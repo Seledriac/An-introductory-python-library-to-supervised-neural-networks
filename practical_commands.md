@@ -1,6 +1,3 @@
-
--------------------------------------------------------------------------PRACTICAL TEST SCRIPT EXECUTION COMMANDS---------------------------------------------------------------------------------
-
 * If you want to try the compiled test script :
     - open cmd
     - cd <your_windows_path_to_the_Python_scripts_package_with_simple_backslashes>
