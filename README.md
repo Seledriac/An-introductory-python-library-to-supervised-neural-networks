@@ -27,7 +27,6 @@
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits
     - During the training time, the hdr_3 spent the last 350 epochs stuck at 85% accuracy, the learning rate was 10.0
 
-*This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning 
-*http://neuralnetworksanddeeplearning.com/
+This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning (http://neuralnetworksanddeeplearning.com)
     
 	
