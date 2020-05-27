@@ -16,7 +16,6 @@ class Network():
         self.num_layers = len(sizes)
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
-        self.weights_animation_data = []
     def feedforward(self, x):
         for w,b in zip(self.weights, self.biases):
             x = sigmoid(np.dot(w, x) + b) 
@@ -30,8 +29,14 @@ class Network():
             print("\nBeginning of the standard SGD method. Accuracy of the model at this state (with random weights and biases) : {}%\n".format(100 * self.evaluate(test_data) / n_test))
             print("The network will be trained with :\n- {0} epochs,\n- a mini-batch size of {1},\n- a learning rate of eta = {2}\n".format(epochs, mini_batch_size, eta))
             accuracies = [100 * self.evaluate(test_data) / n_test]
+            import os
+            dirs= next(os.walk("weights_training_animations"))[1]
+            model_count = len(dirs) + 1
+            file_count = 0
+            os.mkdir("weights_training_animations/training_{}".format(str(model_count)))
             fig = plt.figure(figsize = (8, 8))
-            self.update_plot_weights(fig)
+            fig.suptitle("Weights live training (first hidden layer)", fontsize=16)
+            self.update_plot_weights(fig, model_count, file_count)
             plt.show()
         for i in range(epochs):
             random.shuffle(training_data)
@@ -39,15 +44,26 @@ class Network():
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                self.update_plot_weights(fig)
+                file_count += 1
+                self.update_plot_weights(fig, model_count, file_count)
                 accuracy = 100 * self.evaluate(test_data) / n_test
                 accuracies.append(accuracy)
                 print("\nEpoch n°{0} completed. Accuracy of the model at this state : {1}%".format(i + 1, accuracy))
             else:
                 print("\nEpoch n°{0} completed.".format(i))
         if test_data:
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies)
-            self.weights_training_animation()
+            import glob
+            os.chdir("weights_training_animations/training_{}".format(str(model_count)))
+            gif_name = 'training_animation'
+            file_list = glob.glob('*.png') 
+            list.sort(file_list, key=lambda x: int(x.split('_')[1].split('.png')[0])) 
+            with open('image_list.txt', 'w') as file:
+                for item in file_list:
+                    file.write("%s\n" % item)
+            os.system('convert @image_list.txt {}.gif'.format(gif_name))
+            os.remove('image_list.txt')
+            os.chdir("../../") 
+            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count)
     def update_mini_batch(self, mini_batch, eta):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
@@ -85,27 +101,20 @@ class Network():
         return sum(int(x == y) for x,y in test_results)
     def __repr__(self):
         return "Neural network -> " + self.id + " : " + str(self.sizes)
-    def update_plot_weights(self, fig):
+    def update_plot_weights(self, fig, model_count, file_count):
         for j,weights in enumerate(self.weights[0]):
             fig.add_subplot(6, 6, j+1)
             plt.imshow(weights.reshape(28,28))
-        self.weights_animation_data.append(self.weights[0])
         fig.canvas.draw()
         fig.canvas.flush_events()
-    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies):
+        plt.savefig("weights_training_animations/training_{}/epoch_{}".format(str(model_count),str(file_count)))
+    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count):
         plt.figure(figsize = (8, 8))
         plt.plot(epochs, accuracies)
         plt.title("Training of the model \"{0}\" : mini_batch_size = {1}, eta = {2}".format(self.id, mini_batch_size, eta))
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy (measured on the test data)")
-        plt.show()
-    def weights_training_animation(self):
-        for w in self.weights_animation_data:
-            fig = plt.figure(figsize = (8, 8))
-            plt.show()
-            for j,weights in enumerate(w):    
-                fig.add_subplot(6, 6, j+1)
-                plt.imshow(weights.reshape(28,28))
+        plt.savefig("weights_training_animations/training_{}/training_graph".format(str(model_count)))
             
     
 

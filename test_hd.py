@@ -20,9 +20,12 @@ test_data = list(test_data)
 # - The activation of the 784 input neurons represent the greyscale value of the 28x28 pixels of a handwritten digit image
 # - The hidden neurons add abstraction to the network and hence -> performance
 # - The index of the most activated output neuron is the guessed digit 
-import network
-net = network.Network("hdr", [784, 36, 10])
-print("\n",net, sep="")
+# import network
+import os
+dirs= next(os.walk("weights_training_animations"))[1]
+model_count = len(dirs)
+# net = network.Network("hdr_"+str(model_count + 1), [784, 36, 10])
+# print("\n",net, sep="")
 
 #The network is trained with this single line. It calls the SGD training method for the network instance.
 #Method call : SGD(training_data, epochs, mini_batch_size, eta, test_data=None)
@@ -31,16 +34,16 @@ print("\n",net, sep="")
 # - mini_batch_size is the size of each batch (group of randomly chosen training examples) during the epoch
 # - eta is the learning rate
 # - test_data is the test_data over which the network is evaluated after each epoch (for performance tracking, optionnal)
-net.SGD(training_data, 10, 10, 3.0, test_data = test_data)
+# net.SGD(training_data, 10, 10, 3.0, test_data = test_data)
 
 # We serialize the trained model as a network object in the "hdr" (handwritten_digits_recognizer) file
 import pickle
-with open("hdr", "wb") as saving:
-    saver = pickle.Pickler(saving)
-    saver.dump(net)
+# with open("models/hdr_"+str(model_count + 1), "wb") as saving:
+#     saver = pickle.Pickler(saving)
+#     saver.dump(net)
 
 #Deserialization of a saved model as a network object
-with open("hdr", "rb") as retrieving_model:
+with open("models/hdr_"+str(model_count), "rb") as retrieving_model:
     retriever = pickle.Unpickler(retrieving_model)
     dn = retriever.load()
 
@@ -54,6 +57,7 @@ print("Wow ! Your model can recognize 28x28px images of handwritten digits with 
 #Prediction tests
 
 re = True
+asks = 0
 while re:
 
     #The user choses a number to predict
@@ -84,7 +88,14 @@ while re:
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
     test_image = mpimg.imread(img_filename)
-    plt.figure(figsize = (11, 5))
+    if asks == 0:
+        fig = plt.figure(figsize = (11, 5))
+        plt.show()
+        asks = 1
+    else:
+        plt.clf()
+        fig.canvas.draw()
+        fig.canvas.flush_events()
     plt.subplot(121)
     plt.title("custom image")
     plt.imshow(test_image)
@@ -109,7 +120,6 @@ while re:
                 arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
         ax.annotate(text, xy=(xmax, ymax), xytext=(xmax/10 - 0.1, ymax - 0.1), **kw)
     annot_max(range(10), model_activations)
-    plt.show()
 
     #Ask for a new prediction
     re = str(input("predict another custom digit ? (Y/N) : ")).lower() == "y"

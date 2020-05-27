@@ -21,12 +21,11 @@
 
 * Side notes :
     - the data used for the hdr (handwritten digits recognition) models is loaded from the mnist database by the "mnist_loader" library
-    - the hdr_1 is a 1 hidden layer neural network, with learning parameters : 30, 10, 3.0 
-    - the hdr_2 is a 2 hidden layers neural network, with learning parameters : 60, 10, 3.0
-    - the hdr_3 is a 3 hidden layers neural network, with learning parameters : 500, 500, 10
-    - the training graphs for hdr_1/2/3 are represented in the hd_training_example_1/2/3.png images
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits
-    - During the training time, the hdr_3 spent the last 350 epochs stuck at 85% accuracy, the learning rate was 10.0
+    - The "test_hd.py" script trains a model, stores it in the "models" folder, and the tracked training process in "weights_training_animations"
+
+* Warning :
+    - Don't close the model's prediction window during the execution of the program --> press "n" to terminate the program
 
 This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning (http://neuralnetworksanddeeplearning.com)
     
