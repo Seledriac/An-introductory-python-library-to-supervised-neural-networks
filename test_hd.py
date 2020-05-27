@@ -55,7 +55,7 @@ print("Wow ! Your model can recognize 28x28px images of handwritten digits with 
 
 re = True
 while re:
-    
+
     #The user choses a number to predict
     re1 = True
     while re1:
@@ -113,6 +113,6 @@ while re:
     plt.show()
 
     #Ask for a new prediction
-    re = str(input("predict another custom digit ? (O/N) : ")).lower() == "o"
+    re = str(input("predict another custom digit ? (Y/N) : ")).lower() == "o"
 
 
