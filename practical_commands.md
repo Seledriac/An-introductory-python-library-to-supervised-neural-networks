@@ -16,4 +16,5 @@
     * To check if you are in the right virtual python emplacement --> "os.getcwd()"
     * There you can "import network" or try executing the "test" scripts once ("import test")
 
+* (Coming soon) Try your created models with the graphical interface 
 
