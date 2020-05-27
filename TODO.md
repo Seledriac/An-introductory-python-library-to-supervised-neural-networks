@@ -1,4 +1,5 @@
 * DONE - Convert 256-RGB paint images into lists of floats representing the greyscale values of each pixel --> test the hdrs on it
+* NOT DONE - Code the graphic model testing interface with tkinter            
 * NOT DONE - Find a way to have the gpu doing matrix calculations --> would be much faster
 * NOT DONE - Read the chapter 2 on backpropagation
 * NOT DONE - Learn more advanced neural networks training methods, deep learning / heuristics about how to put the right learning parameters
