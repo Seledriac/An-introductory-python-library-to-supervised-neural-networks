@@ -13,6 +13,7 @@
     - python
     - import os
     - os.chdir("<your_windows_path_to_the_Python_scripts_package_with_double_backslashes>")
+    - os.chdir("C:\\Users\\boumb\\OneDrive\\Bureau\\IA\\Neural-Networks\\tmp_weights")
     * To check if you are in the right virtual python emplacement --> "os.getcwd()"
     * There you can "import network" or try executing the "test" scripts once ("import test")
 

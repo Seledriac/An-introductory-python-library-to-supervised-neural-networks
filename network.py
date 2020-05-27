@@ -4,6 +4,10 @@
 import numpy as np
 import random
 from matplotlib import pyplot as plt
+plt.ion()
+from PIL import Image
+import matplotlib.image as mpimg
+
 
 class Network():
     def __init__(self, id, sizes):
@@ -12,6 +16,7 @@ class Network():
         self.num_layers = len(sizes)
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
+        self.weights_animation_data = []
     def feedforward(self, x):
         for w,b in zip(self.weights, self.biases):
             x = sigmoid(np.dot(w, x) + b) 
@@ -25,20 +30,24 @@ class Network():
             print("\nBeginning of the standard SGD method. Accuracy of the model at this state (with random weights and biases) : {}%\n".format(100 * self.evaluate(test_data) / n_test))
             print("The network will be trained with :\n- {0} epochs,\n- a mini-batch size of {1},\n- a learning rate of eta = {2}\n".format(epochs, mini_batch_size, eta))
             accuracies = [100 * self.evaluate(test_data) / n_test]
+            fig = plt.figure(figsize = (8, 8))
+            self.update_plot_weights(fig)
+            plt.show()
         for i in range(epochs):
             random.shuffle(training_data)
             mini_batches = [training_data[k:k+mini_batch_size] for k in range(0,n,mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                total_n_batches += 1
+                self.update_plot_weights(fig)
                 accuracy = 100 * self.evaluate(test_data) / n_test
                 accuracies.append(accuracy)
                 print("\nEpoch n°{0} completed. Accuracy of the model at this state : {1}%".format(i + 1, accuracy))
             else:
                 print("\nEpoch n°{0} completed.".format(i))
         if test_data:
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs), accuracies)
+            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies)
+            self.weights_training_animation()
     def update_mini_batch(self, mini_batch, eta):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
@@ -76,12 +85,28 @@ class Network():
         return sum(int(x == y) for x,y in test_results)
     def __repr__(self):
         return "Neural network -> " + self.id + " : " + str(self.sizes)
-    def plot_accuracy_graph(self, mini_batch_size, eta, total_n_batches, accuracies):
-        plt.plot(total_n_batches, accuracies)
+    def update_plot_weights(self, fig):
+        for j,weights in enumerate(self.weights[0]):
+            fig.add_subplot(6, 6, j+1)
+            plt.imshow(weights.reshape(28,28))
+        self.weights_animation_data.append(self.weights[0])
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies):
+        plt.figure(figsize = (8, 8))
+        plt.plot(epochs, accuracies)
         plt.title("Training of the model \"{0}\" : mini_batch_size = {1}, eta = {2}".format(self.id, mini_batch_size, eta))
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy (measured on the test data)")
         plt.show()
+    def weights_training_animation(self):
+        for w in self.weights_animation_data:
+            fig = plt.figure(figsize = (8, 8))
+            plt.show()
+            for j,weights in enumerate(w):    
+                fig.add_subplot(6, 6, j+1)
+                plt.imshow(weights.reshape(28,28))
+            
     
 
 def sigmoid(x):

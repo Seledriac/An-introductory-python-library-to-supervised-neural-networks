@@ -20,9 +20,9 @@ test_data = list(test_data)
 # - The activation of the 784 input neurons represent the greyscale value of the 28x28 pixels of a handwritten digit image
 # - The hidden neurons add abstraction to the network and hence -> performance
 # - The index of the most activated output neuron is the guessed digit 
-# import network
-# net = network.Network("hdr_2", [784, 30, 30, 10])
-# print("\n",net, sep="")
+import network
+net = network.Network("hdr", [784, 36, 10])
+print("\n",net, sep="")
 
 #The network is trained with this single line. It calls the SGD training method for the network instance.
 #Method call : SGD(training_data, epochs, mini_batch_size, eta, test_data=None)
@@ -31,21 +31,21 @@ test_data = list(test_data)
 # - mini_batch_size is the size of each batch (group of randomly chosen training examples) during the epoch
 # - eta is the learning rate
 # - test_data is the test_data over which the network is evaluated after each epoch (for performance tracking, optionnal)
-# net.SGD(training_data, 60, 10, 3.0, test_data = test_data)
+net.SGD(training_data, 10, 10, 3.0, test_data = test_data)
 
 # We serialize the trained model as a network object in the "hdr" (handwritten_digits_recognizer) file
 import pickle
-# with open("hdr_2", "wb") as saving:
-#     saver = pickle.Pickler(saving)
-#     saver.dump(net)
+with open("hdr", "wb") as saving:
+    saver = pickle.Pickler(saving)
+    saver.dump(net)
 
 #Deserialization of a saved model as a network object
-with open("hdr_1", "rb") as retrieving_model:
+with open("hdr", "rb") as retrieving_model:
     retriever = pickle.Unpickler(retrieving_model)
     dn = retriever.load()
 
 #Performance testing of the deserialized network 
-print("\nDeserialized network -> \"{0}\"".format(dn))
+print("\nDeserialized network loaded -> \"{0}\"".format(dn))
 accuracy = 100 * dn.evaluate(validation_data) / 10000
 print("\nTest on the validation data -> deserialized network accuracy : {0}%\n".format(accuracy))
 print("Wow ! Your model can recognize 28x28px images of handwritten digits with an accuracy of {0}% !\n".format(accuracy))
@@ -85,7 +85,6 @@ while re:
     import matplotlib.image as mpimg
     test_image = mpimg.imread(img_filename)
     plt.figure(figsize = (11, 5))
-    plt.title("Prediction results")
     plt.subplot(121)
     plt.title("custom image")
     plt.imshow(test_image)
@@ -113,6 +112,6 @@ while re:
     plt.show()
 
     #Ask for a new prediction
-    re = str(input("predict another custom digit ? (Y/N) : ")).lower() == "o"
+    re = str(input("predict another custom digit ? (Y/N) : ")).lower() == "y"
 
 
