@@ -1,6 +1,4 @@
 
--------------------------------------------------------------------------------------------------------GENERAL INFO----------------------------------------------------------------------------------------------------------
-
 * This package contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
 
 * How to setup your testing environment :
@@ -21,7 +19,7 @@
     - test.py
     - test_hd.py (hd for handwritten_digits)
 
-*Side notes :
+* Side notes :
     - the hdr_1 is a 1 hidden layer neural network, with learning parameters : 30, 10, 3.0 
     - the hdr_2 is a 2 hidden layers neural network, with learning parameters : 60, 10, 3.0
     - the hdr_3 is a 3 hidden layers neural network, with learning parameters : 500, 500, 10
