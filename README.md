@@ -20,6 +20,7 @@
     - test_hd.py (hd for handwritten_digits)
 
 * Side notes :
+    - the data used for the hdr models is loaded from the mnist database by the "mnist_loader" library
     - the hdr_1 is a 1 hidden layer neural network, with learning parameters : 30, 10, 3.0 
     - the hdr_2 is a 2 hidden layers neural network, with learning parameters : 60, 10, 3.0
     - the hdr_3 is a 3 hidden layers neural network, with learning parameters : 500, 500, 10
