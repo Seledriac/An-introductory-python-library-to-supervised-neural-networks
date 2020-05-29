@@ -25,8 +25,8 @@ import network
 import os
 dirs= next(os.walk("trainings"))[1]
 model_count = len(dirs)
-#We can of course choose any activation function, by default it will be sigmoid
-net = network.Network("hdr_" + str(model_count + 1), [784, 35, 10], 'tanh')
+#We can of course choose any activation function (sigmoid by default), and the regularization of the outputs (none by default)
+net = network.Network("hdr_" + str(model_count + 1), [784, 32, 10], activation_function_name='sigmoid', regu_name='none')
 
 #The network is trained with this single line. It calls the SGD training method for the network instance.
 #Method call : SGD(training_data, epochs, mini_batch_size, eta, test_data=None)
@@ -35,11 +35,12 @@ net = network.Network("hdr_" + str(model_count + 1), [784, 35, 10], 'tanh')
 # - mini_batch_size is the size of each batch (group of randomly chosen training examples) during the epoch
 # - eta is the learning rate
 # - test_data is the test_data over which the network is evaluated after each epoch (for performance tracking, optionnal)
-net.SGD(training_data, 30, 10, 3, test_data = test_data)
+# - display_weights = True is you want to see the first layer's weights evolving in real time during the training, and save the graphical representation 
+net.SGD(training_data, 15, 10, 10, test_data = test_data, display_weights = False)
 
 #We serialize the trained model as a network object in a file named like itself ("hdr_x")
 import pickle
-with open("models/hdr_"+str(model_count + 1), "wb") as saving:
+with open("models/hdr_"+str(model_count + 1)+"", "wb") as saving:
     saver = pickle.Pickler(saving)
     saver.dump(net)
 
@@ -75,7 +76,6 @@ while re:
             print("\nError, you didn't enter a valid digit.")
 
     #The image filename is retrieved
-    # img_filename = "custom_test_images/mnist_example.bmp"
     img_filename = "custom_test_images/test_image_"+str(chosen_nb)+".bmp"
 
     #Predicting the image
@@ -84,7 +84,7 @@ while re:
     test_image = Image.open(img_filename)
     arr = 1 - np.array(test_image).reshape(784,1) / 255. #Conversion from image to array : 256-RGB to greyscale inverted (1 is black, 0 is white)
     model_activations = dn.feedforward(arr)
-    print("\nAccording to the IA, the plotted number is {0} !\n".format(np.argmax(model_activations)))
+    print("\nAccording to the AI, the plotted number is {0} !\n".format(np.argmax(model_activations)))
 
     #Plotting the test_image, and the activations, in subplots (one plots the image, the other plots the model's activation)
     import matplotlib.pyplot as plt
@@ -111,10 +111,10 @@ while re:
     plt.yticks(np.array(range(11))/10)
     plt.plot(range(10), model_activations)
     #Annotation function to pinpoint the activation on the second subplot
-    def annot_max(x, y, ax=axes):
+    def annot_max(x, y, ax):
         xmax = x[np.argmax(y)]
         ymax = y.max()
-        text= "digit = {}, activation = {:.3f}".format(xmax,ymax)
+        text = "digit = {}, activation = {:.3f}".format(xmax,ymax)        
         if not ax:
             ax=plt.gca()
         bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
@@ -122,7 +122,7 @@ while re:
         kw = dict(xycoords='data',textcoords="axes fraction",
                 arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
         ax.annotate(text, xy=(xmax, ymax), xytext=(xmax/10 - 0.1, ymax - 0.1), **kw)
-    annot_max(range(10), model_activations)
+    annot_max(range(10), model_activations, axes)
 
     #Ask for a new prediction
     re = str(input("predict another custom digit ? (Y/N) : ")).lower() == "y"

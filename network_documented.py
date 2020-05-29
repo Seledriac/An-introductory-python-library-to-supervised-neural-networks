@@ -14,11 +14,15 @@ plt.ion() #for interactive plotting
 from PIL import Image
 import matplotlib.image as mpimg
 from math import sqrt, ceil
+import warnings
+
 class Network():
+
     """The Network class, modeling a neural network, trainable with standard SGD/backpropagation algorithm method"""
-    def __init__(self, id, sizes, activation_function_name = 'sigmoid'):
+
+    def __init__(self, id, sizes, activation_function_name = 'sigmoid', regu_name = 'none'):
         """
-        Network instance constructor. It assigns five descriptives attributes : 
+        Network instance constructor. It assigns six descriptives attributes : 
             - Two attributes modeling the shape of the network :
                 - "sizes", A list containing the size of each layer of the network in order, with the first number and last number being the shape of the input and output layers respectively
                 - "num_layers", The total number of layers,
@@ -26,6 +30,7 @@ class Network():
                 - "biases", A list of column matrixes, each representing the biases of each neuron for each layer
                 - "weights", A list of 2D-matrixes, each containing the weights of the synapses leading to each neuron in a given layer (one neuron = one matrix line, one synapse = one matrix column)
             - The activation function name : by default, sigmoid
+            - The network's output regularization method : by default, none
         And an identifier "id"
         For instance, to create a Network with an input layer of 784 neurons, a hidden layer of 15 neurons, and an output layer of 10 neurons (sigmoid activation), you should do : "net = Network("net", [784,15,10])"
         """
@@ -39,19 +44,27 @@ class Network():
         self.weights = [np.random.randn(y, x) for x,y in zip(sizes[:-1], sizes[1:])]
         self.id = str(id)
         self.activation_function_name = activation_function_name
+        self.regu_name = regu_name
         
     def feedforward(self, a):
         """This method returns the output of the network, given : the input a in parameter (in a matrix column form), the network's shape, the activation function, weights, and biases"""
         for w,b in zip(self.weights, self.biases):
-            a = activation_function(np.dot(w, a) + b, self.activation_function_name)
+            a = self.regu(self.activation_function(np.dot(w, a) + b))
         return a
-    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None):
+
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None, display_weights = True):
         """
         The Stochastic Gradient Descent training method, trains the network to make it behave like the training data, with the number of epochs specified, mini-batch size, and learning-rate "eta" specified. 
         You can add "test-data" to test your Network's performance and track it after each epoch
         """
         training_data = list(training_data)
         n = len(training_data)
+        #If there is some training data to be saved, we create a training directory
+        if test_data or display_weights:
+            import os
+            dirs= next(os.walk("trainings"))[1]
+            model_count = len(dirs) + 1
+            os.mkdir("trainings/training_{}".format(str(model_count)))
         if test_data:
             test_data = list(test_data)
             n_test = len(test_data)
@@ -60,14 +73,9 @@ class Network():
             print("The network will be trained with :\n- {0} epochs,\n- a mini-batch size of {1},\n- a learning rate of eta = {2}\n".format(epochs, mini_batch_size, eta))
             #This variable will track the model's performance through the epochs
             accuracies = [100 * self.evaluate(test_data) / n_test]
-            #Counting the number of existant models
-            import os
-            dirs = next(os.walk("weights_training_animations"))[1]
-            model_count = len(dirs) + 1
+        if display_weights:
             #We will need the file_count to save each epoch representation
             file_count = 0
-            #Creating folders to store the training process
-            os.mkdir("trainings/training_{}".format(str(model_count)))
             os.mkdir("trainings/training_{}/weight_plots".format(str(model_count)))
             #We create a mosaic figure of the weights
             fig_size = ceil(sqrt(len(self.weights[0])))
@@ -87,12 +95,15 @@ class Network():
                 accuracy = 100 * self.evaluate(test_data) / n_test
                 accuracies.append(accuracy)
                 print("Epoch n°{0} completed. Accuracy of the model at this state : {1}%".format(i + 1, 100 * self.evaluate(test_data) / n_test))
-                #And update the live weights training plot
-                file_count += 1
-                self.update_plot_weights(fig, fig_size, model_count, file_count)
             else:
                 print("Epoch n°{0} completed.".format(i))
+            if display_weights:
+                file_count += 1
+                self.update_plot_weights(fig, fig_size, model_count, file_count)
         if test_data:
+            #We plot a summary of the training process
+            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count)
+        if display_weights:
             #Upon training completion, we create a gif of the weights live training
             import glob
             os.chdir("trainings/training_{}/weight_plots".format(str(model_count)))
@@ -105,8 +116,7 @@ class Network():
             os.system('convert @image_list.txt {}.gif'.format(gif_name))
             os.remove('image_list.txt')
             os.chdir("../../../") 
-            #And we plot a summary of the training process
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs), accuracies, model_count)
+            
     def update_mini_batch(self, mini_batch, eta):
         """This method applies the SGD to each weight and bias of the network given a mini-batch of training examples"""
         #We sum the delta_nablas (gradients of the cost function with respect to each weight and bias in the network) over all the training examples in the mini-batch
@@ -120,6 +130,7 @@ class Network():
         #And we apply the gradient descent to each weight and bias of the network according to the learning rate
         self.biases = [b - eta * (nb / len(mini_batch)) for b, nb in zip(self.biases, nabla_b)]
         self.weights = [w - eta * (nw / len(mini_batch)) for w, nw in zip(self.weights, nabla_w)]
+
     def backprop(self, x, y):
         """
         This method returns the gradient of the quadratic cost function (a function representing the square of the distance between the wanted output and the actual network's output)
@@ -139,11 +150,12 @@ class Network():
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = activation_function(z, self.activation_function_name)
+            activation = self.activation_function(z)
             activations.append(activation)
         #First, we calculate the gradient of the output layer
-        #delta is the product of the partial derivative of the quadratic cost with respect to the activation and the partial derivative of the activation with respect to the input z=w.x+b
-        delta = self.quadratic_cost_derivative(activations[-1], y) * activation_function_derivative(zs[-1], self.activation_function_name)
+        #delta is the product of : the partial derivative of the quadratic cost with respect to the regularization function, 
+        #the partial derivative of the regularization function with respect to the activation, and the partial derivative of the activation with respect to the input z=w.x+b
+        delta = self.quadratic_cost_derivative(self.regu(activations[-1]), y) * self.regu_derivative(activations[-1]) * self.activation_function_derivative(zs[-1])
         #the partial derivative of the input z=w.x+b with respect to the biases is always 1. Hence, dCost/db = delta
         delta_nabla_b[-1] = delta
         #the partial derivative of the input z=w.x+b with respect to the weights is the sum of the outputs of the last layer. Hence, dCost/dw = delta * sum(activations_of_last_layer) -> matrix product
@@ -153,7 +165,7 @@ class Network():
             #We retrieve the input activations z=w.x+b
             z = zs[-l]
             #And store the partial derivatives of the activation function with respect to the activation
-            sp = activation_function_derivative(z, self.activation_function_name)
+            sp = self.activation_function_derivative(z)
             #With this data in hand, we can calculate a new derivative of the cost with respect to the output of the actual hidden layer.
             #The delta of the actual layer is equal to sp * the sum of the products of the delta of the next layer and the weights of the next layer -> matrix product
             delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
@@ -163,17 +175,77 @@ class Network():
             delta_nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
         #In the end, each matrix of the gradient has been calculated, we can return the gradient for the training example x,y
         return (delta_nabla_b, delta_nabla_w)
+
+    def activation_function(self, x):
+        """This method computes the network's outputs activation function (sigmoid,relu,tanh)"""
+        if self.activation_function_name == 'sigmoid':
+            return 1 / (1 + np.exp(-x))
+        elif self.activation_function_name == 'relu':
+            return np.maximum(0,x)
+        elif self.activation_function_name == 'tanh':
+            return np.tanh(x)
+
+    def activation_function_derivative(self, x):
+        """This method computes the derivative of the network's outputs activation function (sigmoid,relu,tanh)"""
+        if self.activation_function_name == 'sigmoid':
+            #sigmoid' = sigmoid(1 - sigmoid)
+            return self.activation_function(x) * (1 - self.activation_function(x))
+        elif self.activation_function_name == 'relu':
+            derivs = []
+            for activation in x:
+                if activation <= 0:
+                    derivs.append(0)
+                else:
+                    derivs.append(1)
+            #relu' = 0 if x <= 0 and relu = 1 if x > 0
+            return np.array(derivs).reshape(x.shape)
+        elif self.activation_function_name == 'tanh':
+            #tanh' = 1 - tanh²
+            return 1 - self.activation_function(x) * self.activation_function(x)
+
+    def regu(self, x):
+        """This method computes the network's output regularization function (softmax,normalization,none)"""
+        #We catch the softmax errors because it generates exploding output problems with the exponential sometimes
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error')
+            try:
+                if self.regu_name == 'softmax':
+                    exps = np.exp(x)
+                    return exps / np.sum(exps)
+            except Warning: print(exps)
+        if self.regu_name == 'normalization':
+            #proportion of the x in the output vector
+            return x / np.sum(x) 
+        elif self.regu_name == 'none':
+            #Does nothing
+            return x
+
+    def regu_derivative(self, x):
+        """This method computes the derivative of the network's output regularization function (softmax,normalization,none)"""
+        if self.regu_name == 'softmax':
+            #softmax' = softmax(1 - softmax)
+            return self.regu(x) * (1 - self.regu(x))
+        if self.regu_name == 'normalization':
+            #todo
+            pass
+        if self.regu_name == 'none':
+            #No influence
+            return 1
+
     def quadratic_cost_derivative(self, output_activations, y):
         """This method returns the derivative of the quadratic cost function with respect to the output activations of the last layer"""
         return (output_activations - y)
+
     def evaluate(self, test_data):
         """This method is used to evaluate the accuracy of the model during its training on a given test data-set"""
         #The "test_results" array contains tuples of (index of the network's highest neuron output, wanted index)
         test_results = [(np.argmax(self.feedforward(x)), y) for x,y in test_data]
         return sum(int(x == y) for x,y in test_results)
+
     def __repr__(self):
         """We represent a network instance simply by its identifier and its shape"""
-        return "Neural network -> " + self.id + " : " + str(self.sizes)
+        return "Neural network -> " + self.id + " : " + str(self.sizes) + ", activation function : " + self.activation_function_name + ", regularization method : " + self.regu_name
+
     def update_plot_weights(self, fig, fig_size, model_count, file_count):
         """
         This method plots a mosaic of 28x28px images representations, one image for each hidden neuron in the first layer.
@@ -181,48 +253,40 @@ class Network():
         This method is called at each epoch, and saves the displayed plot in a file (PNG format)   
         """
         for j,weights in enumerate(self.weights[0]):
-            fig.add_subplot(fig_size, fig_size, j + 1)
-            plt.gca().axes.xaxis.set_ticklabels([])
-            plt.gca().axes.yaxis.set_ticklabels([])
-            plt.gca().axes.get_xaxis().set_visible(False)
-            plt.gca().axes.get_yaxis().set_visible(False)
-            plt.imshow(weights.reshape(28,28))
+                fig.add_subplot(fig_size, fig_size, j + 1)
+                plt.gca().axes.xaxis.set_ticklabels([])
+                plt.gca().axes.yaxis.set_ticklabels([])
+                plt.gca().axes.get_xaxis().set_visible(False)
+                plt.gca().axes.get_yaxis().set_visible(False)
+                plt.imshow(weights.reshape(28,28))
         fig.canvas.draw()
         fig.canvas.flush_events()
         plt.savefig("trainings/training_{}/weight_plots/epoch_{}".format(str(model_count),str(file_count)))
+
     def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count):
         """This method is executed right after the end of a network training. It plots the training process, and saves it into a png file"""
         plt.figure(figsize = (8, 8))
         plt.plot(epochs, accuracies)
-        plt.title("Training of the model \"{0}\" : mini_batch_size = {1}, eta = {2}".format(self.id, mini_batch_size, eta))
+        plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}".format(self.id, self.activation_function_name, mini_batch_size, eta))
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy (measured on the test data)")
+        axes = plt.gca()
+        axes.set_ylim([0, 100])
+        plt.xticks(epochs)
+        plt.yticks(range(0,101,10))
+        annot_max(epochs, np.array(accuracies), axes)
         plt.savefig("trainings/training_{}/training_graph".format(str(model_count)))
 
 
-#Activation functions
-
-def activation_function(x, activation_function_name):
-    """Applies the activation function passed in parameter to the x vector"""
-    if activation_function_name == 'sigmoid':
-        return 1 / (1 + np.exp(-x))
-    elif activation_function_name == 'relu':
-        return np.maximum(0,x)
-    elif activation_function_name == 'tanh':
-        return np.tanh(x)
-
-
-def activation_function_derivative(x, activation_function_name):
-    if activation_function_name == 'sigmoid':
-        return activation_function(x, activation_function_name) * (1 - activation_function(x, activation_function_name))
-    elif activation_function_name == 'relu':
-        derivative = []
-        for activation in x:
-            if activation <= 0:
-                derivative.append(0)
-            else:
-                derivative.append(1)
-        return np.array(derivative).reshape(x.shape)
-    elif activation_function_name == 'tanh':
-        return 1 - activation_function(x, activation_function_name) * activation_function(x, activation_function_name)
-
+#plot max annotation
+def annot_max(x, y, ax):
+    xmax = x[np.argmax(y)]
+    ymax = y.max()
+    text = "max accuracy = {:.2f}%".format(ymax)        
+    if not ax:
+        ax=plt.gca()
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data',textcoords="axes fraction",
+            arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(xmax, ymax), xytext=(0.9, 0.85), **kw)

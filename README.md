@@ -4,6 +4,13 @@
 * How to setup your testing environment :
     - see "practical_commands.txt" 
 
+* Requirements :
+    - python 3
+    - numpy
+    - matplotlib
+    - Pillow
+    - ImageMagick
+
 * How to use the network module :
     - Import it : "import network"
     - Create a network instance, specifying its identifier, its shape with a list of numbers, and the activation function :
@@ -24,6 +31,8 @@
     - the data used for the hdr (handwritten digits recognition) models is loaded from the mnist database by the "mnist_loader" library
     - the custom paint test images are 256-RGB format .bmp files
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits
+    - WARNING : the only currently correctly working combination is sigmoid with no regularization
+    - There is a nasty matplotlib deprecation warning at each epoch if you display the weights. You can safely ignore it
     - The "test_hd.py" script trains a model, stores it in the "models" folder, and the tracked training process in "weights_training_animations". It also live displays the weights training, and once the training is done, lets the user use the model to predict on custom examples.
     - The models are saved in the "models" folder, and the trainings in the "trainings" folder
 
