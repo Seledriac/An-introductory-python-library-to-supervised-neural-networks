@@ -13,7 +13,7 @@
 
 * How to use the network module :
     - Import it : "import network"
-    - Create a network instance, specifying its identifier, its shape with a list of numbers, and the activation function :
+    - Create a network instance, specifying its identifier, its shape with a list of numbers, the activation function, and the output regulation function :
     	- The first and last number of the list will always respectively describe the input and output layers of the created network.
         - There are 3 possible activation functions : sigmoid, relu, and tanh
     - Train your network, specifying your hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, test_data, dropout_value)"
@@ -24,20 +24,19 @@
     - Use your model to solve a problem :)
 
 * Usage examples :
-    - test.py
-    - test_hd.py (hd for handwritten_digits)
+    - handwritten digits recognition : we use the mnist dataset : 50000 training images, 10000 test images, and 10000 validation images
 
 * Side notes :
     - the data used for the hdr (handwritten digits recognition) models is loaded from the mnist database by the "mnist_loader" library
     - the custom paint test images are 256-RGB format .bmp files
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits
-    - WARNING : the only currently correctly working combination is sigmoid with no regularization
+    - WARNING : the only currently correctly working combination for regu/activation function is sigmoid with no regularization
     - There is a nasty matplotlib deprecation warning at each epoch if you display the weights. You can safely ignore it
-    - The "test_hd.py" script trains a model, stores it in the "models" folder, and the tracked training process in "weights_training_animations". It also live displays the weights training, and once the training is done, lets the user use the model to predict on custom examples.
+    - The "test_hd.py" script trains a model, stores it in the "models/hd_recognition" folder, and the tracked training process in "trainings". It can also live display the weights training, and once the training is done, let the user use the model to predict on custom examples.
     - The models are saved in the "models" folder, and the trainings in the "trainings" folder
 
 * Warning :
-    - Don't close the model's prediction window during the execution of the program --> press "n" to terminate the program
+    - It is not recommended to close the model's prediction window during the execution of the program --> its best to press "n" to terminate the program
 
 This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning (http://neuralnetworksanddeeplearning.com)
     
