@@ -1,5 +1,5 @@
 
-# -*-coding:utf-8 -*
+# -*- coding:utf-8 -*-
 
 
 """
@@ -52,7 +52,7 @@ class Network():
             a = self.regu(self.activation_function(np.dot(w, a) + b))
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None, display_weights = True):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data = None, display_weights = True, dropout_value = None):
         """
         The Stochastic Gradient Descent training method, trains the network to make it behave like the training data, with the number of epochs specified, mini-batch size, and learning-rate "eta" specified. 
         You can add "test-data" to test your Network's performance and track it after each epoch
@@ -89,7 +89,7 @@ class Network():
             mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n, mini_batch_size)]
             #And then we calculate the gradient, and apply the descent for each mini-batch
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, dropout_value)
             if test_data:
                 #After each epoch, we save the accuracy at this state
                 accuracy = 100 * self.evaluate(test_data) / n_test
@@ -102,7 +102,7 @@ class Network():
                 self.update_plot_weights(fig, fig_size, model_count, file_count)
         if test_data:
             #We plot a summary of the training process
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count)
+            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count, dropout_value)
         if display_weights:
             #Upon training completion, we create a gif of the weights live training
             import glob
@@ -117,21 +117,21 @@ class Network():
             os.remove('image_list.txt')
             os.chdir("../../../") 
             
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, dropout_value):
         """This method applies the SGD to each weight and bias of the network given a mini-batch of training examples"""
         #We sum the delta_nablas (gradients of the cost function with respect to each weight and bias in the network) over all the training examples in the mini-batch
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
             #All the partial derivatives for each weight and each bias are calculated via backpropagation
-            delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            delta_nabla_b, delta_nabla_w = self.backprop(x, y, dropout_value)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         #And we apply the gradient descent to each weight and bias of the network according to the learning rate
         self.biases = [b - eta * (nb / len(mini_batch)) for b, nb in zip(self.biases, nabla_b)]
         self.weights = [w - eta * (nw / len(mini_batch)) for w, nw in zip(self.weights, nabla_w)]
 
-    def backprop(self, x, y):
+    def backprop(self, x, y, dropout_value):
         """
         This method returns the gradient of the quadratic cost function (a function representing the square of the distance between the wanted output and the actual network's output)
         The gradient is calculated with respect to each weight and each bias of each neuron in the network for a given training example x and its wanted output y (both are column matrixes).
@@ -146,11 +146,13 @@ class Network():
         zs = [] # list to store all the z vectors, layer by layer
         # We need to have access to each input and each output of each neuron of the network. Hence, we:
         # - calculate each w.x+b = z at each layer and store them in zs as a list of column matrixes
-        # - store sigmoid(z) in the activations list for each layer
+        # - store sigmoid(z) in the activations list for each layer (and apply dropout if specified)
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
             activation = self.activation_function(z)
+            if dropout_value:
+                activation = self.dropout(activation, dropout_value)
             activations.append(activation)
         #First, we calculate the gradient of the output layer
         #delta is the product of : the partial derivative of the quadratic cost with respect to the regularization function, 
@@ -236,6 +238,10 @@ class Network():
         """This method returns the derivative of the quadratic cost function with respect to the output activations of the last layer"""
         return (output_activations - y)
 
+    def dropout(self, x, dropout_value):
+        """This method applies dropout on the layer's activations vector "x". It also compensates the activation loss by proportionally boosting the activated outputs"""
+        return x * (np.random.binomial([np.ones((len(x),1))], 1 - dropout_value) * (1.0 / (1 - dropout_value))).reshape((len(x),1))
+
     def evaluate(self, test_data):
         """This method is used to evaluate the accuracy of the model during its training on a given test data-set"""
         #The "test_results" array contains tuples of (index of the network's highest neuron output, wanted index)
@@ -244,7 +250,7 @@ class Network():
 
     def __repr__(self):
         """We represent a network instance simply by its identifier and its shape"""
-        return "Neural network -> " + self.id + " : " + str(self.sizes) + ", activation function : " + self.activation_function_name + ", regularization method : " + self.regu_name
+        return "Neural network -> " + str(self.id) + " : " + str(self.sizes) + ", activation function : " + str(self.activation_function_name) + ", output regularization method : " + str(self.regu_name)
 
     def update_plot_weights(self, fig, fig_size, model_count, file_count):
         """
@@ -263,11 +269,15 @@ class Network():
         fig.canvas.flush_events()
         plt.savefig("trainings/training_{}/weight_plots/epoch_{}".format(str(model_count),str(file_count)))
 
-    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count):
+    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count, dropout_value):
         """This method is executed right after the end of a network training. It plots the training process, and saves it into a png file"""
         plt.figure(figsize = (8, 8))
         plt.plot(epochs, accuracies)
-        plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}".format(self.id, self.activation_function_name, mini_batch_size, eta))
+        if not dropout_value:
+            dropout_value = ""
+        else:
+            dropout_value = "dropout = " + str(dropout_value)
+        plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}, {4}".format(self.id, self.activation_function_name, mini_batch_size, eta, dropout_value))
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy (measured on the test data)")
         axes = plt.gca()

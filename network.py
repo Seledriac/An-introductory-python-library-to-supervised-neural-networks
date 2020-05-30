@@ -1,5 +1,5 @@
 
-# -*-coding:utf-8 -*
+# -*- coding:utf-8 -*-
 
 import numpy as np
 import random
@@ -13,7 +13,7 @@ np.seterr(all='warn')
 
 class Network():
 
-    def __init__(self, id, sizes, activation_function_name = 'sigmoid', regu_name='none'):
+    def __init__(self, id, sizes, activation_function_name = 'sigmoid', regu_name=None):
         self.id = str(id)
         self.sizes = sizes
         self.num_layers = len(sizes)
@@ -27,7 +27,7 @@ class Network():
             x = self.regu(self.activation_function(np.dot(w, x) + b)) 
         return x
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None, display_weights = True):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None, display_weights = True, dropout_value = None):
         training_data = list(training_data)
         n = len(training_data)
         if test_data or display_weights:
@@ -53,7 +53,7 @@ class Network():
             random.shuffle(training_data)
             mini_batches = [training_data[k:k+mini_batch_size] for k in range(0,n,mini_batch_size)]
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, dropout_value)
             if test_data:
                 accuracy = 100 * self.evaluate(test_data) / n_test
                 accuracies.append(accuracy)
@@ -64,7 +64,7 @@ class Network():
                 file_count += 1
                 self.update_plot_weights(fig, fig_size, model_count, file_count)
         if test_data:
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count)
+            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count, dropout_value)
         if display_weights:
             import glob
             os.chdir("trainings/training_{}/weight_plots".format(str(model_count)))
@@ -78,17 +78,17 @@ class Network():
             os.remove('image_list.txt')
             os.chdir("../../../") 
 
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, dropout_value):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x,y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.backprop(x,y)
+            delta_nabla_b, delta_nabla_w = self.backprop(x,y, dropout_value)
             nabla_b = [nb + dnb for nb,dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw,dnw in zip(nabla_w, delta_nabla_w)]
         self.biases = [b - eta * (nb / len(mini_batch)) for b,nb in zip(self.biases, nabla_b)]
         self.weights = [w - eta * (nw / len(mini_batch)) for w,nw in zip(self.weights, nabla_w)]
 
-    def backprop(self, x, y):
+    def backprop(self, x, y, dropout_value):
         delta_nabla_b = [np.zeros(b.shape) for b in self.biases]
         delta_nabla_w = [np.zeros(w.shape) for w in self.weights]
         activation = x
@@ -98,6 +98,8 @@ class Network():
             z = np.dot(w,activation) + b
             zs.append(z)
             activation = self.activation_function(z)
+            if dropout_value:
+                activation = self.dropout(activation, dropout_value)
             activations.append(activation)
         delta = self.quadratic_cost_derivative(self.regu(activations[-1]), y) * self.regu_derivative(activations[-1]) * self.activation_function_derivative(zs[-1])
         delta_nabla_b[-1] = delta
@@ -136,32 +138,35 @@ class Network():
         with warnings.catch_warnings():
             warnings.filterwarnings('error')
             try:
-                if self.regu_name == 'softmax':
+                if not self.regu_name:
+                    return x
+                elif self.regu_name == 'normalization':
+                    return x / np.sum(x) 
+                elif self.regu_name == 'softmax':
                     exps = np.exp(x)
                     return exps / np.sum(exps)
             except Warning: print(exps)
-        if self.regu_name == 'normalization':
-            return x / np.sum(x) 
-        elif self.regu_name == 'none':
-            return x
 
     def regu_derivative(self, x):
-        if self.regu_name == 'softmax':
-            return self.regu(x) * (1 - self.regu(x))
-        if self.regu_name == 'normalization':
-            pass
-        if self.regu_name == 'none':
+        if not self.regu_name:
             return 1
+        elif self.regu_name == 'softmax':
+            return self.regu(x) * (1 - self.regu(x))
+        elif self.regu_name == 'normalization':
+            pass
 
     def quadratic_cost_derivative(self, output_activations, y):
         return (output_activations - y)
+
+    def dropout(self, x, dropout_value):
+        return x * (np.random.binomial([np.ones((len(x),1))], 1 - dropout_value) * (1.0 / (1 - dropout_value))).reshape((len(x),1))
 
     def evaluate(self, test_data):
         test_results = [(np.argmax(self.feedforward(x)),y) for x,y in test_data]
         return sum(int(x == y) for x,y in test_results)
 
     def __repr__(self):
-        return "Neural network -> " + self.id + " : " + str(self.sizes) + ", activation function : " + self.activation_function_name + ", regularization method : " + self.regu_name
+        return "Neural network -> " + str(self.id) + " : " + str(self.sizes) + ", activation function : " + str(self.activation_function_name) + ", output regularization method : " + str(self.regu_name)
 
     def update_plot_weights(self, fig, fig_size, model_count, file_count):
         for j,weights in enumerate(self.weights[0]):
@@ -175,10 +180,14 @@ class Network():
         fig.canvas.flush_events()
         plt.savefig("trainings/training_{}/weight_plots/epoch_{}".format(str(model_count),str(file_count)))
 
-    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count):
+    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count, dropout_value):
         plt.figure(figsize = (8, 8))
         plt.plot(epochs, accuracies)
-        plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}".format(self.id, self.activation_function_name, mini_batch_size, eta))
+        if not dropout_value:
+            dropout_value = ""
+        else:
+            dropout_value = "dropout = " + str(dropout_value)
+        plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}, {4}".format(self.id, self.activation_function_name, mini_batch_size, eta, dropout_value))
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy (measured on the test data)")
         axes = plt.gca()

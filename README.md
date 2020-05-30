@@ -2,7 +2,7 @@
 * This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
 
 * How to setup your testing environment :
-    - see "practical_commands.txt" 
+    - see "practical_commands.md" 
 
 * Requirements :
     - python 3
@@ -16,7 +16,7 @@
     - Create a network instance, specifying its identifier, its shape with a list of numbers, and the activation function :
     	- The first and last number of the list will always respectively describe the input and output layers of the created network.
         - There are 3 possible activation functions : sigmoid, relu, and tanh
-    - Train your network, specifying your hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, test_data)"
+    - Train your network, specifying your hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, test_data, dropout_value)"
     	- The training/test/validation data must be lists of tuples of a numpy vector x and a digit y : [(x1 , y1), ... ,(xn , yn)] (where n is the training/validation data-set's size)
     	- The numpy vector x is the input given to the network, and y is this expected output
     - Save your trained model as a serialized Network object in a file
