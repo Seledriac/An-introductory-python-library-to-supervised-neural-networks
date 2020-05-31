@@ -28,24 +28,29 @@ test_data = list(test_data)
 import network
 
 #We name the model after the other created models
-dirs= next(os.walk("trainings"))[1]
-model_count = len(dirs)
+dirs = next(os.walk("models"))[1]
+model_count = len(dirs) - 1
 
 #You can tune : 
 # - the activation function (sigmoid by default)
-# - the regularization of the outputs (none by default)
+# - the regulation of the outputs (none by default)
 net = network.Network("hdr_" + str(model_count + 1), [784, 16, 10])
+net_description = str(net)
+print("\n" + net_description)
 
 #The network is trained with this single line. It calls the SGD training method for the network instance.
 #Method call : SGD(training_data, epochs, mini_batch_size, eta, test_data=None, dropout_value = 0.2)
 # - training_data is the list of (input,expected_output) tuples (where inputs are 784 column matrixes)
 # - epochs is the number of complete training cycles over the training data
 # - mini_batch_size is the size of each batch (group of randomly chosen training examples) during the epoch
-# - eta is the learning rate
+# - eta (by default 3), is the learning rate, it will be adjusted over epochs
+# - min_eta (by default 0.5) is the minimum value the learning will attain while decreasing
 # - test_data (None by default) is the test_data over which the network is evaluated after each epoch (for performance tracking, optionnal)
+# - verbose (True by default) is wether or not you want to see the progress after each accuracy save (each flag)
+# - flags per epoch (5 by default) is how many accuracy flags you want per epoch : at each flag, the learning rate is updated
 # - display_weights (True by default) is you want to see the first layer's weights evolving in real time during the training, and save the graphical representation
 # - dropout value (0 to 1, None by default), is the proportion of desactivated neurons during each gradient computation
-net.SGD(training_data, 15, 10, 1, test_data = test_data, display_weights = False, dropout_value = 0.1)
+net.SGD(training_data, 5, 10)
 
 #We serialize the trained model as a network object in a file named like itself ("hdr_x")
 import pickle
@@ -54,13 +59,12 @@ with open("models/hd_recognition/hdr_"+str(model_count + 1)+"", "wb") as saving:
     saver.dump(net)
 
 #Performance testing of the network on the validation data
-description = str(net)
 accuracy = str(100 * net.evaluate(validation_data) / 10000)
 print("\nTest on the validation data -> Accuracy : {0}%\n".format(accuracy))
 
 #We save the train record
 with open("models/hd_recognition/accuracies_ladder.md", "a") as ladder:
-    adding = description + ", accuracy = " + accuracy + "\n"
+    adding = net_description + ", accuracy = " + accuracy + "\n"
     ladder.write(adding)
 #And update the accuracies ladder (sorting best accuracies)
 with open("models/hd_recognition/accuracies_ladder.md", "r") as ladder:

@@ -27,47 +27,78 @@ class Network():
             x = self.regu(self.activation_function(np.dot(w, x) + b)) 
         return x
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None, display_weights = True, dropout_value = None):
+    def SGD(self, training_data, epochs, mini_batch_size, eta = 3, min_eta = 0.5, test_data = None, verbose = False, flags_per_epoch = 5, display_weights = False, dropout_value = None):
+        flags_per_epoch = int(flags_per_epoch)
+        len_mini_batches = int(len(training_data) / mini_batch_size)
+        fpe = range(0, len_mini_batches + 1, int(len_mini_batches / flags_per_epoch))
+        fpe = [fp for fp in fpe]
+        fpe.remove(0)
+        print(fpe)
         training_data = list(training_data)
         n = len(training_data)
+        print("\nBeginning of the standard SGD method.")
+        print("The network will be trained with :\n- {0} epochs\n- a mini-batch size of {1}\n- a learning rate of eta = {2} (min_eta = {3})\n- {4} flags per epoch".format(epochs, mini_batch_size, eta, min_eta, flags_per_epoch))
+        if dropout_value:
+            print("- a dropout value of {}%\n".format(dropout_value * 100))
         if test_data or display_weights:
             import os
             dirs= next(os.walk("trainings"))[1]
-            model_count = len(dirs) + 1
-            os.mkdir("trainings/training_{}".format(str(model_count)))
+            training_num = len(dirs) + 1
+            os.mkdir("trainings/training_{}".format(str(training_num)))
         if test_data:
             test_data = list(test_data)
             n_test = len(test_data)
-            print("\nBeginning of the standard SGD method. Accuracy of the model at this state (with random weights and biases) : {}%\n".format(100 * self.evaluate(test_data) / n_test))
-            print("The network will be trained with :\n- {0} epochs,\n- a mini-batch size of {1},\n- a learning rate of eta = {2}\n".format(epochs, mini_batch_size, eta))
-            accuracies = [100 * self.evaluate(test_data) / n_test]
+            accuracy = 100 * self.evaluate(test_data) / n_test
+            accuracies = []
+            accuracies.append(accuracy)
+            print("\nAccuracy of the model at this state (with random weights and biases) : {}%\n".format(accuracy))
         if display_weights:
-            os.mkdir("trainings/training_{}/weight_plots".format(str(model_count)))
+            print("\nThe first layer's weights live training will be displayed on a matplotlib figure\n")
+            os.mkdir("trainings/training_{}/weight_plots".format(str(training_num)))
             file_count = 0
             fig_size = ceil(sqrt(len(self.weights[0])))
             fig = plt.figure(figsize = (fig_size, fig_size))
             fig.suptitle("Weights live training (first hidden layer)", fontsize=16)
-            self.update_plot_weights(fig, fig_size, model_count, file_count)
+            self.update_plot_weights(fig, fig_size, training_num, file_count)
             plt.show()
+        states = list()
+        current_eta = eta
         for i in range(epochs):
+            fpe_index = 0
             random.shuffle(training_data)
             mini_batches = [training_data[k:k+mini_batch_size] for k in range(0,n,mini_batch_size)]
-            for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta, dropout_value)
+            for f,mini_batch in enumerate(mini_batches):
+                self.update_mini_batch(mini_batch, current_eta, dropout_value)
+                if (f + 1) % fpe[fpe_index] == 0:
+                    message = "Epoch {0}/{1} : [mini-batch {2} / {3}]".format(i + 1, str(epochs), str(f + 1), str(len(mini_batches)))
+                    if fpe_index != len(fpe) - 1:
+                        fpe_index += 1
+                    if test_data:
+                        accuracy = 100 * self.evaluate(test_data) / n_test
+                        accuracies.append(accuracy)
+                        states.append((accuracy, self.biases, self.weights))
+                        message += " => Accuracy : {0}%".format(str(accuracy))
+                    if verbose:
+                        print(message)                    
+                    if current_eta >= min_eta:
+                        if test_data:
+                            current_eta *= (1 - ((accuracy - (sum(accuracies) / len(accuracies))) / 100))
+                        else:
+                            current_eta *= 0.9
+                    if display_weights:
+                        file_count += 1
+                        self.update_plot_weights(fig, fig_size, training_num, file_count)
             if test_data:
-                accuracy = 100 * self.evaluate(test_data) / n_test
-                accuracies.append(accuracy)
-                print("\nEpoch n°{0} completed. Accuracy of the model at this state : {1}%".format(i + 1, accuracy))
+                print("\nEpoch n°{0} completed. Accuracy of the model at this state : {1}%, eta = {2:.2f}\n".format(i + 1, accuracy, current_eta))
             else:
-                print("\nEpoch n°{0} completed.".format(i))
-            if display_weights:
-                file_count += 1
-                self.update_plot_weights(fig, fig_size, model_count, file_count)
+                print("\nEpoch n°{0} completed.".format(i + 1))
         if test_data:
-            self.plot_accuracy_graph(mini_batch_size, eta, range(epochs + 1), accuracies, model_count, dropout_value)
+            self.plot_accuracy_graph(mini_batch_size, eta, flags_per_epoch, accuracies, training_num, dropout_value)
+            saved_state = sorted(states)[-1]
+            self.biases, self.weights = (saved_state[1], saved_state[2])
         if display_weights:
             import glob
-            os.chdir("trainings/training_{}/weight_plots".format(str(model_count)))
+            os.chdir("trainings/training_{}/weight_plots".format(str(training_num)))
             gif_name = 'training_animation'
             file_list = glob.glob('*.png') 
             list.sort(file_list, key=lambda x: int(x.split('_')[1].split('.png')[0])) 
@@ -76,7 +107,7 @@ class Network():
                     file.write("%s\n" % item)
             os.system('convert @image_list.txt {}.gif'.format(gif_name))
             os.remove('image_list.txt')
-            os.chdir("../../../") 
+            os.chdir("../../../")
 
     def update_mini_batch(self, mini_batch, eta, dropout_value):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
@@ -120,7 +151,7 @@ class Network():
         elif self.activation_function_name == 'tanh':
             return np.tanh(x)
 
-    def activation_function_derivative(self, x, regu=False):
+    def activation_function_derivative(self, x):
         if self.activation_function_name == 'sigmoid':
             return self.activation_function(x) * (1 - self.activation_function(x))
         elif self.activation_function_name == 'relu':
@@ -141,19 +172,39 @@ class Network():
                 if not self.regu_name:
                     return x
                 elif self.regu_name == 'normalization':
-                    return x / np.sum(x) 
+                    sum = np.sum(x) 
+                    if sum != 0:
+                        return x / np.sum(x) 
+                    else:
+                        return x
                 elif self.regu_name == 'softmax':
                     exps = np.exp(x)
-                    return exps / np.sum(exps)
-            except Warning: print(exps)
+                    sum = np.sum(exps)
+                    if sum != 0:
+                        return exps / np.sum(exps)
+                    else:
+                        return x
+            except Warning: 
+                if self.regu_name == 'softmax': 
+                    print("normalization error : exps = ", exps)
+                elif self.regu_name == 'normalization':
+                    print("normalization error : np.sum(x) = ",np.sum(x), '\nx = ', x)
+                elif not self.regu_name:
+                    print(x)
 
     def regu_derivative(self, x):
         if not self.regu_name:
             return 1
         elif self.regu_name == 'softmax':
-            return self.regu(x) * (1 - self.regu(x))
+            if sum(x) != 0:
+                return self.regu(x) * (1 - self.regu(x))
+            else:
+                return 1
         elif self.regu_name == 'normalization':
-            pass
+            if sum(x):
+                return (1 / sum(x)) * (1 - self.regu(x))
+            else:
+                return 1
 
     def quadratic_cost_derivative(self, output_activations, y):
         return (output_activations - y)
@@ -166,9 +217,9 @@ class Network():
         return sum(int(x == y) for x,y in test_results)
 
     def __repr__(self):
-        return "Neural network -> " + str(self.id) + " : " + str(self.sizes) + ", activation function : " + str(self.activation_function_name) + ", output regularization method : " + str(self.regu_name)
+        return "Neural network -> " + str(self.id) + " : " + str(self.sizes) + ", activation function : " + str(self.activation_function_name) + ", output regulation method : " + str(self.regu_name)
 
-    def update_plot_weights(self, fig, fig_size, model_count, file_count):
+    def update_plot_weights(self, fig, fig_size, training_num, file_count):
         for j,weights in enumerate(self.weights[0]):
             fig.add_subplot(fig_size, fig_size, j + 1)      
             plt.gca().axes.xaxis.set_ticklabels([])
@@ -178,32 +229,33 @@ class Network():
             plt.imshow(weights.reshape(28,28))
         fig.canvas.draw()
         fig.canvas.flush_events()
-        plt.savefig("trainings/training_{}/weight_plots/epoch_{}".format(str(model_count),str(file_count)))
+        plt.savefig("trainings/training_{}/weight_plots/epoch_{}".format(str(training_num),str(file_count)))
 
-    def plot_accuracy_graph(self, mini_batch_size, eta, epochs, accuracies, model_count, dropout_value):
+    def plot_accuracy_graph(self, mini_batch_size, eta, fpe, accuracies, training_num, dropout_value):
         plt.figure(figsize = (8, 8))
-        plt.plot(epochs, accuracies)
+        x = range(len(accuracies))
+        plt.plot(x, accuracies)
         if not dropout_value:
             dropout_value = ""
         else:
             dropout_value = "dropout = " + str(dropout_value)
         plt.title("Training of the model \"{0}\" ({1}): mini_batch_size = {2}, eta = {3}, {4}".format(self.id, self.activation_function_name, mini_batch_size, eta, dropout_value))
-        plt.xlabel("Epochs")
+        plt.xlabel("Epoch completions")
         plt.ylabel("Accuracy (measured on the test data)")
         axes = plt.gca()
         axes.set_ylim([0, 100])
-        plt.xticks(epochs)
+        ticks = np.array(range(0, len(accuracies), fpe))
+        plt.xticks(ticks, np.array(ticks/fpe, dtype='int'))
         plt.yticks(range(0,101,10))
-        annot_max(epochs, np.array(accuracies), axes)
-        plt.savefig("trainings/training_{}/training_graph".format(str(model_count)))
-
+        annot_max(x, np.array(accuracies), axes, fpe)
+        plt.savefig("trainings/training_{}/training_graph".format(str(training_num)))
 
 
 #plot max annotation
-def annot_max(x, y, ax):
+def annot_max(x, y, ax, fpe):
     xmax = x[np.argmax(y)]
     ymax = y.max()
-    text = "max accuracy = {:.2f}%".format(ymax)        
+    text = "max accuracy = {:.2f}%, at epoch {}".format(ymax, ceil(xmax / fpe))        
     if not ax:
         ax=plt.gca()
     bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
