@@ -1,3 +1,4 @@
+###Supervised Neural Networks###
 
 * This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
 
