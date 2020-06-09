@@ -1,3 +1,4 @@
+# Supervised Neural Networks
 
 * This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
 
@@ -5,7 +6,7 @@
     - see "practical_commands.md" 
 
 * Requirements :
-    - python 3
+    - python 3 (includes Tkinter)
     - numpy
     - matplotlib
     - Pillow
@@ -20,6 +21,7 @@
     	- The training/test/validation data must be lists of tuples of a numpy vector x and a digit y : [(x1 , y1), ... ,(xn , yn)] (where n is the training/validation data-set's size), where x is are numpy vectors, representing the inputs given to the network, and y are the corresponding expected outputs
     - Save your trained model as a serialized Network object in a file
     - Track the performances of your models during and after training, end up with the optimal configuration to solve your problem, and try to predict with the model on custom examples
+    - You can use your own training/testing/validation data sets and extraction scripts (in the "mnist_loader.py" style) for them to implement the networks in any AI problem.
 
 * Usage examples :
     - handwritten digits recognition : we use the mnist dataset : 50000 training images, 10000 test images, and 10000 validation images
@@ -37,6 +39,7 @@
 * Warning :
     - It is not recommended to close the model's prediction window during the execution of the program --> its best to press "n" to terminate the program
 
-This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning (http://neuralnetworksanddeeplearning.com)
+This library was inspired by the Michael Nielsen's e-book : Neural Networks and deep learning (http://neuralnetworksanddeeplearning.com).
+"mnist_loader.py" script written by Michael Nielsen
     
 	
