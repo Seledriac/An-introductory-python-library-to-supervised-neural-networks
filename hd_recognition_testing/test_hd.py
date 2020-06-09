@@ -54,7 +54,7 @@ net.SGD(training_data, 5, 10, display_weights=True)
 
 #We serialize the trained model as a network object in a file named like itself ("hdr_x")
 import pickle
-with open("models/hd_recognition/hdr_"+str(model_count + 1)+"", "wb") as saving:
+with open("models/hd_recognition/hdr_{}.pickle".format(str(model_count + 1)), "wb") as saving:
     saver = pickle.Pickler(saving)
     saver.dump(net)
 
