@@ -58,13 +58,13 @@ class Interface(tk.Frame):
 
         #Button selection frame
         self.btns_frames = tk.LabelFrame(self, padx=50, pady=50, borderwidth=5)
-        self.btns_frames.grid(row=1, column=1, columnspan=3, pady=75, padx=(0,180))
+        self.btns_frames.grid(row=1, column=1, columnspan=3, pady=(65,80), padx=(0,180))
 
         #Menu Buttons
         self.create_model_button = tk.Button(self.btns_frames, text="Create a model", font=self.big_font_button, command=lambda: self.create_model(fenetre, **kwargs))
         self.create_model_button.grid(column=0, row=0, padx=10, pady=10)
         
-        self.train_model_button = tk.Button(self.btns_frames, text="Train a model", font=self.big_font_button, command=self.quit)
+        self.train_model_button = tk.Button(self.btns_frames, text="Train a model", font=self.big_font_button, command=lambda: self.train_model(fenetre, **kwargs))
         self.train_model_button.grid(column = 1, row = 0, padx=10, pady=10)
 
         self.evaluate_button = tk.Button(self.btns_frames, text="Evaluate", font=self.big_font_button, command=self.quit)
@@ -94,21 +94,21 @@ class Interface(tk.Frame):
         self.title.grid(column=1, row=0, padx=(100,0))
 
         #Model Validation frame
-        self.model_validation_frame = tk.LabelFrame(self, borderwidth=3)
-        self.model_validation_frame.grid(row=0, column=2, padx=(0,100), pady=(20,0))
-        self.model_validation_label = tk.Label(self.model_validation_frame, text="Model name", font=self.medium_font_button)
-        self.model_validation_label.pack()
-        self.model_validation_entry = tk.Entry(self.model_validation_frame)
-        self.model_validation_entry.pack()
-        self.model_validation_button = tk.Button(self.model_validation_frame, text="Create Model", font=self.medium_font_button, command=self.model_validation)
-        self.model_validation_button.pack()
+        self.model_creation_validation_frame = tk.LabelFrame(self, borderwidth=3)
+        self.model_creation_validation_frame.grid(row=0, column=2, padx=(0,100), pady=(20,0))
+        self.model_creation_validation_label = tk.Label(self.model_creation_validation_frame, text="Model name", font=self.medium_font_button)
+        self.model_creation_validation_label.pack()
+        self.model_creation_validation_entry = tk.Entry(self.model_creation_validation_frame)
+        self.model_creation_validation_entry.pack()
+        self.model_creation_validation_button = tk.Button(self.model_creation_validation_frame, text="Create Model", font=self.medium_font_button, command=self.model_creation_validation)
+        self.model_creation_validation_button.pack()
 
         #Model customization frame
-        self.custom_frame = tk.LabelFrame(self, padx=50, pady=50, borderwidth=5)
-        self.custom_frame.grid(row=1, column=1, columnspan=3, padx=(0,500), pady=(30,0))
+        self.creation_custom_frame = tk.LabelFrame(self, padx=50, pady=50, borderwidth=5)
+        self.creation_custom_frame.grid(row=1, column=1, columnspan=3, padx=(0,500), pady=(30,0))
 
         #Input layer Frame
-        self.input_layer_frame = tk.LabelFrame(self.custom_frame)
+        self.input_layer_frame = tk.LabelFrame(self.creation_custom_frame)
         self.input_layer_frame.grid(row=0, column=0)
         self.input_layer_label = tk.Label(self.input_layer_frame, text="Input Layer", font=self.medium_font_button)
         self.input_layer_label.pack()
@@ -118,13 +118,13 @@ class Interface(tk.Frame):
 
         #Hidden layers Frame
         self.hidden_layers = []
-        self.hidden_layers_frame = tk.LabelFrame(self.custom_frame)
+        self.hidden_layers_frame = tk.LabelFrame(self.creation_custom_frame)
         self.hidden_layers_frame.grid(row=0, column=1)
         self.add_hidden_layer()
         self.add_hidden_layer()
 
         #Output layer Frame
-        self.output_layer_frame = tk.LabelFrame(self.custom_frame)
+        self.output_layer_frame = tk.LabelFrame(self.creation_custom_frame)
         self.output_layer_frame.grid(row=0, column=2, padx=70)
         self.output_layer_label = tk.Label(self.output_layer_frame, text="Output Layer", font=self.medium_font_button)
         self.output_layer_label.pack()
@@ -133,9 +133,9 @@ class Interface(tk.Frame):
         self.output_layer_number.pack()
 
         #Hidden layer adding/deleting buttons
-        self.add_hidden_layer_button = tk.Button(self.custom_frame, text="Add a hidden layer", font=self.medium_font_button, command=self.add_hidden_layer)
+        self.add_hidden_layer_button = tk.Button(self.creation_custom_frame, text="Add a hidden layer", font=self.medium_font_button, command=self.add_hidden_layer)
         self.add_hidden_layer_button.grid(column = 0, row = 1, padx=50, pady=40)
-        self.del_hidden_layer_button = tk.Button(self.custom_frame, text="Delete the last hidden layer", font=self.medium_font_button, command=self.del_hidden_layer)
+        self.del_hidden_layer_button = tk.Button(self.creation_custom_frame, text="Delete the last hidden layer", font=self.medium_font_button, command=self.del_hidden_layer)
         self.del_hidden_layer_button.grid(column = 1, row = 1, padx=50, pady=40, columnspan=2)
     
 
@@ -161,17 +161,17 @@ class Interface(tk.Frame):
             self.hidden_layers_label.destroy()
             delattr(self, 'hidden_layers_label')
     
-    def model_validation(self):
+    def model_creation_validation(self):
         """This method is executed when the model creation validation button is clicked. It creates the model, serlializes it, and shows a recap od the model in a message box to the user"""
-        model_name = self.model_validation_entry.get()
+        model_name = self.model_creation_validation_entry.get()
         try:
             input_number = int(self.input_layer_number.get())
             output_number = int(self.output_layer_number.get())
         except ValueError:
-            messagebox.showerror("Error", "Error, enter a number of neurons for all the layers")
+            messagebox.showerror("Error", "Error : enter a number of neurons for all the layers")
         if model_name and input_number and output_number:
             sizes = [input_number]
-            msg = "Model \"{}\" successfully created.\n\nInput layer : {} neurons\n".format(str(self.model_validation_entry.get()), str(input_number))
+            msg = "Model \"{}\" successfully created.\n\nInput layer : {} neurons\n".format(str(self.model_creation_validation_entry.get()), str(input_number))
             for i,layer in enumerate(self.hidden_layers):
                 nb_neurons = int(layer.get())
                 sizes.append(nb_neurons)
@@ -185,7 +185,41 @@ class Interface(tk.Frame):
             print(net)
             messagebox.showinfo("Model Info", msg)
         else:
-            messagebox.showerror("Error", "Error, missing required fields")
+            messagebox.showerror("Error", "Error : missing required fields")
+
+
+    def train_model(self, fenetre, **kwargs):
+        """Model training Frame"""
+        #Frame creation
+        self.destroy()
+        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        self.pack()
+
+        #Model file opening prompt
+        
+
+        #Main menu Button
+        img_home = ImageTk.PhotoImage(Image.open("hd_recognition_testing/assets/home.png").resize((95,50)))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home.img = img_home
+        btn_home.grid(column=0, row=0, padx=(50,0))
+        
+        #Title
+        self.title = tk.Label(self, text="Model Training", bg="#fff2f2", font=self.font_title)
+        self.title.grid(column=1, row=0, padx=(100,0))
+
+        #Model training validation frame
+        self.model_training_validation_frame = tk.LabelFrame(self, borderwidth=3)
+        self.model_training_validation_frame.grid(row=0, column=2, padx=(0,100), pady=(20,0))
+        self.model_training_validation_button = tk.Button(self.model_training_validation_frame, text="Train", font=self.medium_font_button, command=lambda: self.model_training_validation(fenetre, **kwargs))
+        self.model_training_validation_button.pack()
+
+        #Model training customization frame
+        self.training_custom_frame = tk.LabelFrame(self, padx=50, pady=50, borderwidth=5)
+        self.training_custom_frame.grid(row=1, column=1, columnspan=3, padx=(0,500), pady=(30,0))
+
+    def model_training_validation(self, fenetre, **kwargs):
+        pass
         
 
 #Window creation
@@ -196,3 +230,4 @@ fenetre.configure(bg="#fff2f2")
 interface = Interface(fenetre)
 interface.mainloop()
 interface.destroy()
+
