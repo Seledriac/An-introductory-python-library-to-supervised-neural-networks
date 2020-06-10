@@ -50,6 +50,7 @@ print("\n" + net_description)
 # - flags per epoch (5 by default) is how many accuracy flags you want per epoch : at each flag, the learning rate is updated
 # - display_weights (True by default) is you want to see the first layer's weights evolving in real time during the training, and save the graphical representation
 # - dropout value (0 to 1, None by default), is the proportion of desactivated neurons during each gradient computation
+# - optimize_accuracy (False by default, many bugs), is wether or not the model is keeping the best state which occured during training
 net.SGD(training_data, 5, 10, display_weights=True)
 
 #We serialize the trained model as a network object in a file named like itself ("hdr_x")
