@@ -9,10 +9,13 @@
     ```
     python
     import os
-    os.chdir("<your_path_to_the_library>")
+    os.chdir("<your_path_to_this_library>")
     ```
     * To check if you are in the right virtual python emplacement --> "os.getcwd()"
-    * There you can "import network", build/train a model on your own training data, save it, and use it to make predictions
+    * There you can "import network", build/train a model on your own training data, save it, evaluate it, and use it to make predictions
 
-* (Coming soon) Use the library with a graphical interface 
+* Test the library on handwritten digits recognition with a graphical interface :
+    - open shell
+    - cd <your_path_to_the_library/hd_recognition>
+    - python GUI.py
 
