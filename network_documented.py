@@ -18,7 +18,7 @@ import warnings
 
 class Network():
 
-    """The Network class, modeling a neural network, trainable with standard SGD/backpropagation algorithm method"""
+    """The Network class, modeling a feedforward neural network, trainable with standard SGD/backpropagation algorithm method"""
 
     def __init__(self, id, sizes, activation_function_name = 'sigmoid', regu_name = 'none'):
         """
