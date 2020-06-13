@@ -12,6 +12,8 @@ from tkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from PIL import ImageTk, Image
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtGui import QPainter, QPixmap, QPen, QScreen
 import pickle
 import webbrowser
 import os
@@ -483,21 +485,37 @@ class Interface(tk.Frame):
 
 
     def live_prediction_frame(self, fenetre, **kwargs):
-        """Live predictions of the numbers drew by the user"""
+        """Live prediction of the numbers drew by the user"""
         # Frame creation
         self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        fenetre.geometry("1500x800")
+        tk.Frame.__init__(self, fenetre, width=1500, height=800, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
         btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
         btn_home.img = img_home
-        btn_home.grid(column=0, row=0, pady=(10,30))
+        btn_home.grid(column=0, row=0, padx=100)
+        
+        # Title
+        title = tk.Label(self, text="Live prediction\nDraw the number to predict", bg="#fff2f2", font=self.font_title)
+        title.grid(column=1, row=0, pady=80)
 
-        # Title label
-        title_label = tk.Label(self, text="Live prediction\nDraw the number to predict", font=self.number_button_font, bg="#fff2f2")
-        title_label.grid(row=0, column=1, columnspan=2, padx=(0,150), pady=10)
+        # Start button frame
+        live_prediction_starting_frame = tk.LabelFrame(self, borderwidth=3)
+        live_prediction_starting_frame.grid(row=0, column=2, padx=100)
+        live_prediction_starting_button = tk.Button(live_prediction_starting_frame, text="Start", font=self.medium_large_font_button, command=lambda: self.start_live_prediction(fenetre))
+        live_prediction_starting_button.pack()
+
+    def start_live_prediction(self, fenetre):
+        """Live prediction Qt drawing window display"""
+        # DrawingWindow creation
+        App = QApplication(sys.argv)
+        QtWindow = DrawingWindow(App, self)
+        QtWindow.setWindowTitle("Digit drawing window")
+        QtWindow.show()
+        sys.exit(App.exec())
 
 
 # ------------------------------------------------------------------------------Miscellaneous Methods--------------------------------------------------------------------------------------
@@ -554,10 +572,67 @@ class Interface(tk.Frame):
 
 
 
-# ------------------------------------------------------------------------------pyQt drawing window----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------PyQt drawing window----------------------------------------------------------------------------------------
+
+class DrawingWindow(QMainWindow):
+
+    def __init__(self, App, tkinter_root):
+        super().__init__()
+        self.label = QLabel()        
+        self.blank()
+        self.setCentralWidget(self.label)
+        self.App = App
+        self.tkinter_root = tkinter_root
+
+        self.last_x, self.last_y = None, None
+
+    def blank(self):
+        self.label.setPixmap(QPixmap("hd_recognition/assets/white.png"))
+
+    def mouseMoveEvent(self, e):
+        if self.last_x is None: # First event.
+            self.last_x = e.x()
+            self.last_y = e.y()
+            return # Ignore the first time.
+
+        painter = QPainter(self.label.pixmap())
+        painter.drawLine(self.last_x, self.last_y, e.x(), e.y())
+        painter.end()
+        self.update()
+
+        # Update the origin for next time.
+        self.last_x = e.x()
+        self.last_y = e.y()
+
+    def mouseReleaseEvent(self, e):
+        self.last_x = None
+        self.last_y = None
+        
+        # Saving the screenshot and compressing it to a 28x28 image
+        QScreen.grabWindow(self.App.primaryScreen(), self.winId()).save("hd_recognition/tmp/screenshot.png", 'png')
+        resize_img = Image.open("hd_recognition/tmp/screenshot.png")
+        resize_img = resize_img.resize((28,28))
+        resize_img.save("hd_recognition/tmp/screenshot.png", 'png')
+        
+        # Converting from standard png to greyscale 
+        img_array = np.array(Image.open("hd_recognition/tmp/screenshot.png"))
+        img_array = np.array([[pixel[0] for pixel in line] for line in img_array])
+        image_array = 1 - (img_array.reshape(784,1) / 255)
+
+        # Predicting the number 
+        model_activations = self.tkinter_root.model_file.feedforward(image_array)
+
+        # Prediction plot frame
+        prediction_frame = tk.LabelFrame(self.tkinter_root)
+        prediction_frame.grid(row=2,column=2)
+
+        # Plotting the model activations
+        self.tkinter_root.plot_model_activation(model_activations, prediction_frame)
 
 
-# Window creation
+
+# -----------------------------------------------------------------------------Tkinter Window creation-------------------------------------------------------------------------------------
+
 fenetre = tk.Tk()
 fenetre.geometry("1180x620")
 fenetre.title("Neural Networks")
