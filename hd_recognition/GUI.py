@@ -32,7 +32,7 @@ class Interface(tk.Frame):
 
 # ------------------------------------------------------------------------------__init__------------------------------------------------------------------------------------------------
 
-    def __init__(self, fenetre, **kwargs):
+    def __init__(self, window, **kwargs):
         """Displays the main menu"""
         # Fonts
         self.big_font_button = tkFont.Font(family='Calibri', size=20, weight='bold')
@@ -42,17 +42,17 @@ class Interface(tk.Frame):
         self.number_button_font = tkFont.Font(family='Calibri', size=25, weight='bold')
 
         # Display main menu
-        self.main_menu(fenetre, **kwargs)
+        self.main_menu(window, **kwargs)
 
 
 # ------------------------------------------------------------------------------Main Menu Interface--------------------------------------------------------------------------------------
 
-    def main_menu(self, fenetre, **kwargs):
+    def main_menu(self, window, **kwargs):
         """Main menu Frame"""
         # Frame creation
         if hasattr(self, 'children'):
             self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Github Button
@@ -76,33 +76,33 @@ class Interface(tk.Frame):
         btns_frames.grid(row=1, column=1, columnspan=3, pady=(65,80), padx=(0,180))
 
         # Menu Buttons
-        create_model_button = tk.Button(btns_frames, text="Create a model", font=self.big_font_button, command=lambda: self.create_model(fenetre, **kwargs))
+        create_model_button = tk.Button(btns_frames, text="Create a model", font=self.big_font_button, command=lambda: self.create_model(window, **kwargs))
         create_model_button.grid(column=0, row=0, padx=10, pady=10)
         
-        train_model_button = tk.Button(btns_frames, text="Train a model", font=self.big_font_button, command=lambda: self.train_model(fenetre, **kwargs))
+        train_model_button = tk.Button(btns_frames, text="Train a model", font=self.big_font_button, command=lambda: self.train_model(window, **kwargs))
         train_model_button.grid(column = 1, row = 0, padx=10, pady=10)
 
-        evaluate_button = tk.Button(btns_frames, text="Accuracy Ladder", font=self.big_font_button, command=lambda: self.models_ladder(fenetre, **kwargs))
+        evaluate_button = tk.Button(btns_frames, text="Accuracy Ladder", font=self.big_font_button, command=lambda: self.models_ladder(window, **kwargs))
         evaluate_button.grid(column = 0, row = 1, padx=10, pady=10)
         
-        predict_button = tk.Button(btns_frames, text="Predict", font=self.big_font_button, command=lambda: self.choose_prediction(fenetre, **kwargs))
+        predict_button = tk.Button(btns_frames, text="Predict", font=self.big_font_button, command=lambda: self.choose_prediction(window, **kwargs))
         predict_button.grid(column = 1, row = 1, padx=10, pady=10)
 
 
 # ------------------------------------------------------------------------------Model Creation Interface------------------------------------------------------------------------------------
 
-    def create_model(self, fenetre, **kwargs):
+    def create_model(self, window, **kwargs):
         """Model creation Frame"""
         # Frame creation
         self.destroy()
         if hasattr(self, 'hidden_layers_label'):
             delattr(self, 'hidden_layers_label')
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0)
         
@@ -204,11 +204,11 @@ class Interface(tk.Frame):
 
 # ------------------------------------------------------------------------------Model Training Interface------------------------------------------------------------------------------------
 
-    def train_model(self, fenetre, **kwargs):
+    def train_model(self, window, **kwargs):
         """Model training specs Frame"""
         # Frame creation
         self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Chosing the model which we will train
@@ -216,7 +216,7 @@ class Interface(tk.Frame):
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0, padx=(25,0))
         
@@ -227,7 +227,7 @@ class Interface(tk.Frame):
         # Model training validation frame
         model_training_validation_frame = tk.LabelFrame(self, borderwidth=3)
         model_training_validation_frame.grid(row=0, column=2, padx=(200,0), pady=(10,0))
-        model_training_validation_button = tk.Button(model_training_validation_frame, text="Train", font=self.medium_large_font_button, command=lambda: self.model_training(fenetre, **kwargs))
+        model_training_validation_button = tk.Button(model_training_validation_frame, text="Train", font=self.medium_large_font_button, command=lambda: self.model_training(window, **kwargs))
         model_training_validation_button.pack()
 
         # Model training customization frame
@@ -259,7 +259,7 @@ class Interface(tk.Frame):
         display_weights_cb = tk.Checkbutton(display_weights_frame, text="Dynamically display the weights of the first layer", font=self.medium_font_button, variable=self.display_weights_value)
         display_weights_cb.pack()
 
-    def model_training(self, fenetre, **kwargs):
+    def model_training(self, window, **kwargs):
         """Model training Frame"""
 
         # Training values retrieving
@@ -273,11 +273,11 @@ class Interface(tk.Frame):
         if epochs and batch_size:
             # Frame creation
             self.destroy()
-            tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+            tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
 
             # Main menu Button
             img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-            btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+            btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
             btn_home.img = img_home
             btn_home.grid(column=0, row=0)
 
@@ -342,15 +342,15 @@ class Interface(tk.Frame):
 
 # ------------------------------------------------------------------------------Models Ladder Interface------------------------------------------------------------------------------------
 
-    def models_ladder(self, fenetre, **kwargs):
+    def models_ladder(self, window, **kwargs):
         """Models ladder frame"""
         # Frame creation
         self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0)
 
@@ -379,11 +379,11 @@ class Interface(tk.Frame):
 
 # ------------------------------------------------------------------------------Prediction Interface---------------------------------------------------------------------------------------
 
-    def choose_prediction(self, fenetre, **kwargs):
+    def choose_prediction(self, window, **kwargs):
         """Prediction style choice frame"""
         # Frame creation
         self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Opening the model which will predict
@@ -391,7 +391,7 @@ class Interface(tk.Frame):
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0, padx=(0,125), pady=(15,100))
 
@@ -400,22 +400,22 @@ class Interface(tk.Frame):
         choice_label.grid(row=0, column=1, columnspan=10, padx=(50,250), pady=50)
 
         # Choice buttons
-        choice_custom = tk.Button(self, text="Predict with custom test images", font=self.big_font_button, command=lambda: self.custom_prediction_frame(fenetre, **kwargs))
+        choice_custom = tk.Button(self, text="Predict with custom test images", font=self.big_font_button, command=lambda: self.custom_prediction_frame(window, **kwargs))
         choice_custom.grid(row=1, column=1, padx=(0,0), pady=(100))
-        choice_live = tk.Button(self, text="Live prediction", font=self.big_font_button, command=lambda: self.live_prediction_frame(fenetre, **kwargs))
+        choice_live = tk.Button(self, text="Live prediction", font=self.big_font_button, command=lambda: self.live_prediction_frame(window, **kwargs))
         choice_live.grid(row=1, column=2, padx=(50,200), pady=(100))
     
-    def custom_prediction_frame(self, fenetre, **kwargs):
+    def custom_prediction_frame(self, window, **kwargs):
         """Custom images prediction frame"""
 
         # Frame creation
         self.destroy()
-        tk.Frame.__init__(self, fenetre, width=1180, height=620, bg="#fff2f2", **kwargs)
+        tk.Frame.__init__(self, window, width=1180, height=620, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0, pady=(10,30))
 
@@ -484,17 +484,17 @@ class Interface(tk.Frame):
         self.plot_model_activation(model_activations, prediction_frame)
 
 
-    def live_prediction_frame(self, fenetre, **kwargs):
+    def live_prediction_frame(self, window, **kwargs):
         """Live prediction of the numbers drew by the user"""
         # Frame creation
         self.destroy()
-        fenetre.geometry("1500x800")
-        tk.Frame.__init__(self, fenetre, width=1500, height=800, bg="#fff2f2", **kwargs)
+        window.geometry("1500x800")
+        tk.Frame.__init__(self, window, width=1500, height=800, bg="#fff2f2", **kwargs)
         self.pack()
 
         # Main menu Button
         img_home = ImageTk.PhotoImage(Image.open("hd_recognition/assets/home.png").resize((95,50)))
-        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(fenetre, **kwargs))
+        btn_home = tk.Button(self, image=img_home, command=lambda: self.main_menu(window, **kwargs))
         btn_home.img = img_home
         btn_home.grid(column=0, row=0, padx=100)
         
@@ -505,10 +505,10 @@ class Interface(tk.Frame):
         # Start button frame
         live_prediction_starting_frame = tk.LabelFrame(self, borderwidth=3)
         live_prediction_starting_frame.grid(row=0, column=2, padx=100)
-        live_prediction_starting_button = tk.Button(live_prediction_starting_frame, text="Start", font=self.medium_large_font_button, command=lambda: self.start_live_prediction(fenetre))
+        live_prediction_starting_button = tk.Button(live_prediction_starting_frame, text="Start", font=self.medium_large_font_button, command=lambda: self.start_live_prediction(window))
         live_prediction_starting_button.pack()
 
-    def start_live_prediction(self, fenetre):
+    def start_live_prediction(self, window):
         """Live prediction Qt drawing window display"""
         # DrawingWindow creation
         App = QApplication(sys.argv)
@@ -638,10 +638,10 @@ class DrawingWindow(QMainWindow):
 
 # -----------------------------------------------------------------------------Tkinter Window creation-------------------------------------------------------------------------------------
 
-fenetre = tk.Tk()
-fenetre.geometry("1180x620")
-fenetre.title("Neural Networks")
-fenetre.configure(bg="#fff2f2")
-interface = Interface(fenetre)
+window = tk.Tk()
+window.geometry("1180x620")
+window.title("Neural Networks")
+window.configure(bg="#fff2f2")
+interface = Interface(window)
 interface.mainloop()
 
