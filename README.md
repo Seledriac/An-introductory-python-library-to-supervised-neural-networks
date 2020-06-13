@@ -1,6 +1,8 @@
-# Supervised Neural Networks
+# Supervised Feedforward Neural Networks
 
-* This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
+* This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method.
+
+* The core contents of this module are explained in the "network_documented.py" script.
 
 * The core contents of this module are explained in the "network_documented.py" script.
 
@@ -12,7 +14,7 @@
     - numpy
     - matplotlib
     - Pillow
-    - ImageMagick
+    - ImageMagick (optional, for weights display during training)
 
 * How to use the network module :
     - Import it : "import network"
@@ -25,11 +27,15 @@
     - Track the performances of your models during and after training, end up with the optimal configuration to solve your problem, and try to predict with the model on custom examples
     - You can use your own training/testing/validation data sets and extraction scripts (in the "mnist_loader.py" style) for them to implement the networks in any AI problem.
 
+<<<<<<< HEAD
 * Use cases :
+=======
+* Use cases examples :
+>>>>>>> 0163300e68bf8f823145acf34ae3f01fd211f8c5
     - handwritten digits recognition : we use the mnist dataset : 50000 training images, 10000 test images, and 10000 validation images
     - Use the "GUI.py" graphical interface (located in the hd_recognition folder) to get a simplified usage of the network creation, model training using the mnist dataset, and user-friendly image recognition predictions
 
-![](hd_recognition/demo.png?raw=true)
+![GUI custom digit prediction example](https://github.com/Seledriac/A-small-pedagogic-python-library-for-supervised-neural-networks/tree/master/hd_recognition/demo.PNG?raw=true)
 
 * Side notes :
     - the 'network-documented.py' script explains the network module essentials (no gui, weights plotting stuff)
