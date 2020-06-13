@@ -3,7 +3,7 @@
 
 
 """
-This module contains a class which models a neural network
+This module contains a class which models a feedforward neural network
 """
 
 #Third-party libraries
@@ -18,7 +18,7 @@ import warnings
 
 class Network():
 
-    """The Network class, modeling a neural network, trainable with standard SGD/backpropagation algorithm method"""
+    """The Network class, modeling a feedforward neural network, trainable with standard SGD/backpropagation algorithm method"""
 
     def __init__(self, id, sizes, activation_function_name = 'sigmoid', regu_name = 'none'):
         """
@@ -40,7 +40,7 @@ class Network():
         #Creates one bias column matrix for each layer appart from the input one
         self.biases = [np.random.randn(x, 1) for x in sizes[1:]]
         #Creates one 2D-matrix for each layer appart from the input one
-        #Note : The weights matrixes linking the n-th layer of size x to the (n+1)th layer of size y are matrixes of size y,x : this makes the W.A + B computation straightforward (where A is the input)
+        #Note : The weights matrixes linking the n-th layer of size x to the (n+1)th layer of size y are matrixes of size y,x : this makes the W.A + B matrix computation straightforward (where A is the input)
         self.weights = [np.random.randn(y, x) for x,y in zip(sizes[:-1], sizes[1:])]
         self.id = str(id)
         self.activation_function_name = activation_function_name
