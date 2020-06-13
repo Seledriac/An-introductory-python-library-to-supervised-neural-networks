@@ -1,6 +1,8 @@
 # Supervised Feedforward Neural Networks
 
-* This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method
+* This repository contains a network module, with a class which models a neural Network you can train in a supervised learning paradigm with the standard SGD (Stochastic Gradient Descent)/backpropagation algorithm method.
+
+* The core contents of this module are explained in the "network_documented.py" script.
 
 * How to setup your testing environment :
     - see "practical_commands.md" 
