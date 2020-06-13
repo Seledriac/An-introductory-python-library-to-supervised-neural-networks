@@ -1,5 +1,5 @@
 * DONE - Test the model's prediction capabilities with custom paint images 
-* DONE - An "accuracies ladder" to track the best models performances
+* DONE - An "accuracy ladder" to track the best models performances
 * DONE - Represent in real time the training of the network's weights. Save the training process in an animation gif
 * DONE - Implement the different activation functions (sigmoid, relu, tanh)
 * DONE - Implement output regulation functions (softmax, simple norm) and their derivatives for backpropagation
