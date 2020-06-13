@@ -28,7 +28,7 @@
 
 * Side notes :
     - the data used for the hdr (handwritten digits recognition) models is loaded from the mnist database by the "mnist_loader" library
-    - the custom paint test images are 256-RGB format .bmp files
+    - the custom paint test images are 256-RGB format .bmp files and each one has a 400x400 PNG version ready to display
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits (for overfitting reasons)
     - WARNING : the only currently correctly working combination for regulation/activation functions is sigmoid with no regulation ( about activations functions : relu doesn't work without softmax and tanh is very unstable, regarding regulation functions : softmax and normalization have exploding or vanishing output values problems). Overall, with regulation functions, the results are very bad.
     - The "test_hd.py" script trains a model, stores it in the "models/hd_recognition" folder, and the tracked training process in "trainings". It can also live display the weights training, and once the training is done, let the user use the model to predict on custom examples.
