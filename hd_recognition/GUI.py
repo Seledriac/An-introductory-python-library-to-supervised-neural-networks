@@ -3,7 +3,7 @@
 
 """Handwritten digits recognition Graphic interface module : training done with the mnist dataset"""
 
-# Third-party Libraries
+# Third-party gui/system/plotting Libraries
 import numpy as np
 import tkinter as tk
 import tkinter.font as tkFont
@@ -23,6 +23,7 @@ import network
 
 
 
+# ------------------------------------------------------------------------------tkinter GUI---------------------------------------------------------------------------------------------
 class Interface(tk.Frame):
     """graphic interface class"""
 
@@ -497,7 +498,6 @@ class Interface(tk.Frame):
         # Title label
         title_label = tk.Label(self, text="Live prediction\nDraw the number to predict", font=self.number_button_font, bg="#fff2f2")
         title_label.grid(row=0, column=1, columnspan=2, padx=(0,150), pady=10)
-        
 
 
 # ------------------------------------------------------------------------------Miscellaneous Methods--------------------------------------------------------------------------------------
@@ -552,6 +552,9 @@ class Interface(tk.Frame):
         ax.annotate(text, xy=(xmax, ymax), xytext=(0.8, 0.5), **kw)
     annot_max = staticmethod(annot_max)
 
+
+
+# ------------------------------------------------------------------------------pyQt drawing window----------------------------------------------------------------------------------------
 
 
 # Window creation
