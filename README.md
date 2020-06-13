@@ -25,7 +25,7 @@
     - Track the performances of your models during and after training, end up with the optimal configuration to solve your problem, and try to predict with the model on custom examples
     - You can use your own training/testing/validation data sets and extraction scripts (in the "mnist_loader.py" style) for them to implement the networks in any AI problem.
 
-* Usage examples :
+* Use cases examples :
     - handwritten digits recognition : we use the mnist dataset : 50000 training images, 10000 test images, and 10000 validation images
     - Use the "GUI.py" graphical interface (located in the hd_recognition folder) to get a simplified usage of the network creation, model training using the mnist dataset, and user-friendly image recognition predictions
 
