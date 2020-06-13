@@ -40,7 +40,7 @@ class Network():
         #Creates one bias column matrix for each layer appart from the input one
         self.biases = [np.random.randn(x, 1) for x in sizes[1:]]
         #Creates one 2D-matrix for each layer appart from the input one
-        #Note : The weights matrixes linking the n-th layer of size x to the (n+1)th layer of size y are matrixes of size y,x : this makes the W.A + B computation straightforward (where A is the input)
+        #Note : The weights matrixes linking the n-th layer of size x to the (n+1)th layer of size y are matrixes of size y,x : this makes the W.A + B matrix computation straightforward (where A is the input)
         self.weights = [np.random.randn(y, x) for x,y in zip(sizes[:-1], sizes[1:])]
         self.id = str(id)
         self.activation_function_name = activation_function_name
