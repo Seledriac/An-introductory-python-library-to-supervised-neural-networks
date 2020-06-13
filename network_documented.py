@@ -3,7 +3,7 @@
 
 
 """
-This module contains a class which models a neural network
+This module contains a class which models a feedforward neural network
 """
 
 #Third-party libraries
