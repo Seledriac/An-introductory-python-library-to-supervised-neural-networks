@@ -17,7 +17,7 @@
     - Create a network instance, specifying its identifier, its shape with a list of numbers, the activation function, and the output regulation function :
     	- The first and last number of the list will always respectively describe the input and output layers of the created network.
     	- There are 3 possible activation functions : sigmoid, relu, and tanh
-    - Train your network, tuning the hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, min_eta, test_data, verbose, flags_per_epoch, display_weights, dropout_value)"
+    - Train your network, tuning the hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, min_eta, test_data, verbose, flags_per_epoch, display_weights, dropout_value, gui, optimize_accuracy)"
     	- The training/test/validation data must be lists of tuples of a numpy vector x and a digit y : [(x1 , y1), ... ,(xn , yn)] (where n is the training/validation data-set's size), where x vectors are numpy vectors, representing the inputs given to the network, and y are the corresponding expected outputs
     - Save your trained model as a serialized Network object in a file
     - Track the performances of your models during and after training, end up with the optimal configuration to solve your problem, and try to predict with the model on custom examples
@@ -32,7 +32,7 @@
 * Side notes :
     - the 'network-documented.py' script explains the network module essentials (no gui, weights plotting stuff)
     - the data used for the hdr (handwritten digits recognition) models is loaded from the mnist database by the "mnist_loader" library
-    - the custom paint test images in the hd_recognition folder are 256-RGB format .bmp files and each one has a 400x400 PNG version ready to display
+    - the custom paint test images in the hd_recognition folder are 256-RGB format .bmp files, and each one has a 400x400 PNG version ready to display
     - WARNING : the performance on the mnist dataset =/= the performance on custom handwritten digits (for overfitting reasons)
     - WARNING : the only currently correctly working combination for regulation/activation functions is sigmoid with no regulation ( about activations functions : relu doesn't work without softmax and tanh is very unstable, regarding regulation functions : softmax and normalization have exploding or vanishing output values problems). Overall, with regulation functions, the results are very bad.
     - The "test_hd.py" script trains a model, stores it in the "models/hd_recognition" folder, and the tracked training process in "trainings". It can also live display the weights training, and once the training is done, let the user use the model to predict on custom examples.
