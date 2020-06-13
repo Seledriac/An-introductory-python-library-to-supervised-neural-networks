@@ -10,7 +10,7 @@
     - numpy
     - matplotlib
     - Pillow
-    - ImageMagick
+    - ImageMagick (optional, for weights display during training)
 
 * How to use the network module :
     - Import it : "import network"
