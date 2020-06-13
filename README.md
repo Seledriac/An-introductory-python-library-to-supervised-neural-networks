@@ -18,7 +18,7 @@
     	- The first and last number of the list will always respectively describe the input and output layers of the created network.
     	- There are 3 possible activation functions : sigmoid, relu, and tanh
     - Train your network, tuning the hyper-parameters, using "net.SGD(training_data, epochs, mini_batch_size, learning_rate, min_eta, test_data, verbose, flags_per_epoch, display_weights, dropout_value)"
-    	- The training/test/validation data must be lists of tuples of a numpy vector x and a digit y : [(x1 , y1), ... ,(xn , yn)] (where n is the training/validation data-set's size), where x is are numpy vectors, representing the inputs given to the network, and y are the corresponding expected outputs
+    	- The training/test/validation data must be lists of tuples of a numpy vector x and a digit y : [(x1 , y1), ... ,(xn , yn)] (where n is the training/validation data-set's size), where x vectors are numpy vectors, representing the inputs given to the network, and y are the corresponding expected outputs
     - Save your trained model as a serialized Network object in a file
     - Track the performances of your models during and after training, end up with the optimal configuration to solve your problem, and try to predict with the model on custom examples
     - You can use your own training/testing/validation data sets and extraction scripts (in the "mnist_loader.py" style) for them to implement the networks in any AI problem.
