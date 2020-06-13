@@ -576,7 +576,10 @@ class Interface(tk.Frame):
 
 class DrawingWindow(QMainWindow):
 
+    """Drawing window for live model prediction"""
+
     def __init__(self, App, tkinter_root):
+        """Initialization of the Drawing Window : we create a label centered in the window, in which we put a blank pixmap"""
         super().__init__()
         self.label = QLabel()        
         self.blank()
@@ -587,27 +590,25 @@ class DrawingWindow(QMainWindow):
         self.last_x, self.last_y = None, None
 
     def blank(self):
+        """This method clears the QtWindow, setting the content of the centered label to a white pixmap"""
         self.label.setPixmap(QPixmap("hd_recognition/assets/white.png"))
 
     def mouseMoveEvent(self, e):
-        if self.last_x is None: # First event.
+        """This method is executed while the click button is held"""
+        if self.last_x is None: 
             self.last_x = e.x()
             self.last_y = e.y()
-            return # Ignore the first time.
+            return 
 
         painter = QPainter(self.label.pixmap())
         painter.drawLine(self.last_x, self.last_y, e.x(), e.y())
         painter.end()
         self.update()
 
-        # Update the origin for next time.
+        # Updating the origin for next time
         self.last_x = e.x()
         self.last_y = e.y()
 
-    def mouseReleaseEvent(self, e):
-        self.last_x = None
-        self.last_y = None
-        
         # Saving the screenshot and compressing it to a 28x28 image
         QScreen.grabWindow(self.App.primaryScreen(), self.winId()).save("hd_recognition/tmp/screenshot.png", 'png')
         resize_img = Image.open("hd_recognition/tmp/screenshot.png")
@@ -628,6 +629,10 @@ class DrawingWindow(QMainWindow):
 
         # Plotting the model activations
         self.tkinter_root.plot_model_activation(model_activations, prediction_frame)
+
+    def mouseReleaseEvent(self, e):
+        self.last_x = None
+        self.last_y = None
 
 
 
