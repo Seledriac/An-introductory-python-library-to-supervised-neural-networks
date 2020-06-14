@@ -30,7 +30,7 @@
     - handwritten digits recognition : we use the mnist dataset : 50000 training images, 10000 test images, and 10000 validation images
     - Use the "GUI.py" graphical interface (located in the hd_recognition folder) to get a simplified usage of the network creation, model training using the mnist dataset, and user-friendly image recognition predictions
 
-![GUI custom digit prediction example](https://github.com/Seledriac/A-small-pedagogic-python-library-for-supervised-neural-networks/tree/master/hd_recognition/demo.PNG?raw=true)
+![GUI custom digit prediction example](https://i.postimg.cc/ZKMhw7Lt/demo.png?raw=true)
 
 * Side notes :
     - the 'network-documented.py' script explains the network module essentials (no gui, weights plotting stuff)
