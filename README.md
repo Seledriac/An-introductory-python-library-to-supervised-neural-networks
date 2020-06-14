@@ -13,6 +13,7 @@
     - matplotlib
     - Pillow
     - ImageMagick (optional, for weights display during training)
+    - PyQt5 (optional, for GUI live prediction drawing zone)
 
 * How to use the network module :
     - Import it : "import network"
